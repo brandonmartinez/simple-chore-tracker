@@ -1,0 +1,8 @@
+{
+	"name": "simple-chore-tracker",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"remoteUser": "node",
+	"postCreateCommand": "bash .devcontainer/postCreateCommand.sh"
+}
