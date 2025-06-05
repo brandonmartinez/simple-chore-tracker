@@ -1,0 +1,18 @@
+/* Tailwind CSS styles for the page shell */
+@import "tailwindcss";
+
+/* Custom styles */
+body {
+	@apply bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200;
+}
+
+#root {
+	@apply flex flex-col items-center justify-center min-h-screen;
+}
+
+/* Responsive design */
+@media (min-width: 768px) {
+	#root {
+		@apply px-4;
+	}
+}

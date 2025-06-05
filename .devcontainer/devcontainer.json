@@ -4,5 +4,17 @@
 		"dockerfile": "Dockerfile"
 	},
 	"remoteUser": "node",
-	"postCreateCommand": "bash .devcontainer/postCreateCommand.sh"
+	"postCreateCommand": "bash .devcontainer/postCreateCommand.sh",
+	"forwardPorts": [
+		5432,
+		3000
+	],
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"esbenp.prettier-vscode",
+				"cweijan.vscode-postgresql-client2"
+			]
+		}
+	}
 }

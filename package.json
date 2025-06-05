@@ -9,13 +9,22 @@
 		"build": "vite build",
 		"start": "node src/backend/server.js",
 		"db:migrate": "npx knex migrate:latest --knexfile ./knexfile.cjs",
-		"db:seed": "npx knex seed:run --knexfile ./knexfile.cjs"
+		"db:seed": "npx knex seed:run --knexfile ./knexfile.cjs",
+		"db:migrate:new": "bash -c 'read -p \"Enter migration name: \" name; sanitized=$(echo \"$name\" | tr -s \" \" | tr \"[:upper:]\" \"[:lower:]\" | tr \" \" \"_\"); timestamp=$(date +\"%Y%m%d_%H%M%S\"); knex migrate:make \"$timestamp_$sanitized\"'"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "MIT",
 	"dependencies": {
+		"@tailwindcss/aspect-ratio": "^0.4.2",
+		"@tailwindcss/forms": "^0.5.10",
+		"@tailwindcss/line-clamp": "^0.4.4",
+		"@tailwindcss/postcss": "^4.1.8",
+		"@tailwindcss/typography": "^0.5.16",
+		"@tailwindcss/vite": "^4.1.8",
+		"dotenv": "^16.5.0",
 		"express": "^5.1.0",
+		"http-proxy-middleware": "^3.0.5",
 		"knex": "^3.1.0",
 		"pg": "^8.16.0",
 		"react": "^19.1.0",
@@ -24,11 +33,14 @@
 	"devDependencies": {
 		"@eslint/js": "^9.28.0",
 		"@vitejs/plugin-react": "^4.5.1",
+		"autoprefixer": "^10.4.21",
 		"concurrently": "^8.0.0",
 		"eslint": "^9.28.0",
 		"eslint-plugin-react": "^7.37.5",
 		"globals": "^16.2.0",
 		"nodemon": "^3.0.0",
+		"postcss": "^8.5.4",
+		"tailwindcss": "^4.1.8",
 		"vite": "^6.3.5"
 	}
 }
