@@ -7,6 +7,7 @@ function ChoreGrid({
 	sortedCategories,
 	onAssign,
 	onComplete,
+	onRemoveAssignment,
 }) {
 	return (
 		<div
@@ -41,6 +42,7 @@ function ChoreGrid({
 										person={person}
 										onAssign={onAssign}
 										onComplete={onComplete}
+										onRemoveAssignment={onRemoveAssignment}
 									/>
 								))}
 							</React.Fragment>

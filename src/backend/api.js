@@ -45,8 +45,48 @@ router.get("/chore-assignments", async (req, res) => {
 });
 
 router.post("/chore-assignments", async (req, res) => {
-	const [id] = await req.app.locals.db("ChoreAssignments").insert(req.body);
-	res.json({ id });
+	const { chore_id, person_id, time_period_id } = req.body;
+	try {
+		// Check if an assignment already exists for the chore and time period
+		const existingAssignment = await req.app.locals
+			.db("ChoreAssignments")
+			.where({ chore_id, time_period_id })
+			.first();
+
+		if (existingAssignment) {
+			// Update the existing assignment
+			await req.app.locals
+				.db("ChoreAssignments")
+				.where({ id: existingAssignment.id })
+				.update({ person_id });
+		} else {
+			// Create a new assignment
+			await req.app.locals
+				.db("ChoreAssignments")
+				.insert({ chore_id, person_id, time_period_id });
+		}
+
+		res.status(201).json({ success: true });
+	} catch (error) {
+		res.status(500).json({ error: "Failed to assign chore." });
+	}
+});
+
+// Add endpoint to remove assignments
+router.delete("/chore-assignments", async (req, res) => {
+	const { chore_id, time_period_id } = req.body;
+	console.log("DELETE request received:", { chore_id, time_period_id });
+	try {
+		const result = await req.app.locals
+			.db("ChoreAssignments")
+			.where({ chore_id, time_period_id })
+			.del();
+		console.log("Database delete result:", result);
+		res.status(200).json({ success: true });
+	} catch (error) {
+		console.error("Error deleting assignment:", error);
+		res.status(500).json({ error: "Failed to remove assignment." });
+	}
 });
 
 // Rewards endpoints

@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
 import ChoreGrid from "./ChoreGrid";
+import {
+	fetchChores,
+	fetchPeople,
+	fetchCurrentTimePeriod,
+	fetchAssignments,
+	assignChore,
+	completeChore,
+	removeAssignment,
+} from "./apiService";
 
 export default function App() {
 	const [chores, setChores] = useState([]);
@@ -7,21 +16,33 @@ export default function App() {
 	const [timePeriod, setTimePeriod] = useState(null);
 
 	useEffect(() => {
-		// Fetch chores
-		fetch("/api/chores")
-			.then((res) => res.json())
-			.then(setChores);
-
-		// Fetch people
-		fetch("/api/people")
-			.then((res) => res.json())
-			.then(setPeople);
-
-		// Fetch current time period
-		fetch("/api/current-time-period")
-			.then((res) => res.json())
-			.then(setTimePeriod);
+		fetchChores().then(setChores);
+		fetchPeople().then(setPeople);
+		fetchCurrentTimePeriod().then(setTimePeriod);
 	}, []);
+
+	useEffect(() => {
+		if (!timePeriod) return;
+
+		fetchAssignments().then((assignments) => {
+			setChores((prevChores) => {
+				const updatedChores = prevChores.map((chore) => {
+					const assignment = assignments.find(
+						(a) => a.chore_id === chore.id && a.time_period_id === timePeriod.id
+					);
+					return assignment
+						? {
+								...chore,
+								assignedTo: assignment.person_id ? [assignment.person_id] : [],
+						  }
+						: chore;
+				});
+				return JSON.stringify(updatedChores) === JSON.stringify(prevChores)
+					? prevChores
+					: updatedChores;
+			});
+		});
+	}, [timePeriod]);
 
 	function formatDate(dateStr) {
 		// Parse as UTC if dateStr is in 'YYYY-MM-DD' format to avoid timezone issues
@@ -50,23 +71,36 @@ export default function App() {
 	const sortedCategories = Object.keys(groupedChores).sort();
 
 	function handleAssign(choreId, personId) {
-		// Logic to assign chore to person
-		setChores((prevChores) =>
-			prevChores.map((chore) =>
-				chore.id === choreId
-					? { ...chore, assignedTo: [...(chore.assignedTo || []), personId] }
-					: chore
-			)
-		);
+		assignChore(choreId, personId, timePeriod.id).then(() => {
+			setChores((prevChores) =>
+				prevChores.map((chore) =>
+					chore.id === choreId ? { ...chore, assignedTo: [personId] } : chore
+				)
+			);
+		});
 	}
 
 	function handleComplete(choreId) {
-		// Logic to mark chore as completed
-		setChores((prevChores) =>
-			prevChores.map((chore) =>
-				chore.id === choreId ? { ...chore, completed: true } : chore
-			)
-		);
+		completeChore(choreId, timePeriod.id).then(() => {
+			setChores((prevChores) =>
+				prevChores.map((chore) =>
+					chore.id === choreId ? { ...chore, completed: true } : chore
+				)
+			);
+		});
+	}
+
+	function handleRemoveAssignment(choreId) {
+		console.log("Removing assignment for chore:", choreId);
+		removeAssignment(choreId, timePeriod.id).then(() => {
+			setChores((prevChores) => {
+				const updatedChores = prevChores.map((chore) =>
+					chore.id === choreId ? { ...chore, assignedTo: [] } : chore
+				);
+				console.log("Updated chores state:", updatedChores);
+				return updatedChores;
+			});
+		});
 	}
 
 	return (
@@ -79,6 +113,7 @@ export default function App() {
 				sortedCategories={sortedCategories}
 				onAssign={handleAssign}
 				onComplete={handleComplete}
+				onRemoveAssignment={handleRemoveAssignment}
 			/>
 		</div>
 	);
