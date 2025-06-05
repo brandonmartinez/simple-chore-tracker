@@ -23,15 +23,15 @@ router.post("/chores", async (req, res) => {
 	res.json({ id });
 });
 
-// ChoreAvailableAssignments endpoints
-router.get("/chore-available-assignments", async (req, res) => {
+// Update endpoints to be under '/chores/assignments/available'
+router.get("/chores/assignments/available", async (req, res) => {
 	const assignments = await req.app.locals
 		.db("ChoreAvailableAssignments")
 		.select("*");
 	res.json(assignments);
 });
 
-router.post("/chore-available-assignments", async (req, res) => {
+router.post("/chores/assignments/available", async (req, res) => {
 	const [id] = await req.app.locals
 		.db("ChoreAvailableAssignments")
 		.insert(req.body);
@@ -39,12 +39,12 @@ router.post("/chore-available-assignments", async (req, res) => {
 });
 
 // ChoreAssignments endpoints
-router.get("/chore-assignments", async (req, res) => {
+router.get("/chores/assignments", async (req, res) => {
 	const assignments = await req.app.locals.db("ChoreAssignments").select("*");
 	res.json(assignments);
 });
 
-router.post("/chore-assignments", async (req, res) => {
+router.post("/chores/assignments", async (req, res) => {
 	const { chore_id, person_id, time_period_id } = req.body;
 	try {
 		// Check if an assignment already exists for the chore and time period
@@ -73,7 +73,7 @@ router.post("/chore-assignments", async (req, res) => {
 });
 
 // Add endpoint to remove assignments
-router.delete("/chore-assignments", async (req, res) => {
+router.delete("/chores/assignments", async (req, res) => {
 	const { chore_id, time_period_id } = req.body;
 	console.log("DELETE request received:", { chore_id, time_period_id });
 	try {
@@ -122,8 +122,8 @@ router.post("/time-periods", async (req, res) => {
 	res.json({ id });
 });
 
-// Add endpoint to fetch or create the current time period
-router.get("/current-time-period", async (req, res) => {
+// Update endpoint to have a more REST-like structure
+router.get("/time-periods/current", async (req, res) => {
 	const currentDate = new Date();
 
 	// Calculate the beginning of the week (Sunday)
@@ -151,6 +151,35 @@ router.get("/current-time-period", async (req, res) => {
 	}
 
 	res.json(timePeriod);
+});
+
+// Endpoint to dynamically generate and return the last 10 weeks
+router.get("/time-periods/available", async (req, res) => {
+	const pastCount = parseInt(req.query.pastCount, 10) || 10;
+	const today = new Date();
+	const weeks = [];
+	for (let i = 0; i < pastCount; i++) {
+		const startOfWeek = new Date(today);
+		startOfWeek.setDate(today.getDate() - today.getDay() - i * 7);
+		weeks.push({
+			id: i,
+			start_date: startOfWeek.toISOString().split("T")[0],
+		});
+	}
+	res.json(weeks);
+});
+
+// Assignments endpoint
+router.get("/assignments", async (req, res) => {
+	const { timePeriodId } = req.query;
+	if (!timePeriodId) {
+		return res.status(400).json({ error: "Missing timePeriodId parameter" });
+	}
+	const assignments = await req.app.locals
+		.db("Assignments")
+		.where("time_period_id", timePeriodId)
+		.select("chore_id", "person_id", "time_period_id");
+	res.json(assignments);
 });
 
 export default router;
