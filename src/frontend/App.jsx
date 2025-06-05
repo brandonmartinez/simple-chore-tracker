@@ -49,6 +49,26 @@ export default function App() {
 
 	const sortedCategories = Object.keys(groupedChores).sort();
 
+	function handleAssign(choreId, personId) {
+		// Logic to assign chore to person
+		setChores((prevChores) =>
+			prevChores.map((chore) =>
+				chore.id === choreId
+					? { ...chore, assignedTo: [...(chore.assignedTo || []), personId] }
+					: chore
+			)
+		);
+	}
+
+	function handleComplete(choreId) {
+		// Logic to mark chore as completed
+		setChores((prevChores) =>
+			prevChores.map((chore) =>
+				chore.id === choreId ? { ...chore, completed: true } : chore
+			)
+		);
+	}
+
 	return (
 		<div>
 			<h1>Simple Chore Tracker</h1>
@@ -57,6 +77,8 @@ export default function App() {
 				people={people}
 				groupedChores={groupedChores}
 				sortedCategories={sortedCategories}
+				onAssign={handleAssign}
+				onComplete={handleComplete}
 			/>
 		</div>
 	);

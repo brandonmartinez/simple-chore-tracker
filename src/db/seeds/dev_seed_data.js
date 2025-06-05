@@ -10,8 +10,6 @@ export async function seed(knex) {
 
 	// Inserts seed entries
 	await knex("People").insert([
-		{ name: "Brandon" },
-		{ name: "Joy" },
 		{ name: "Seth" },
 		{ name: "Perry" },
 		{ name: "Poppy" },

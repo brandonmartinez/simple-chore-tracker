@@ -1,46 +1,48 @@
 import React from "react";
+import ChoreCell from "./ChoreCell";
 
-function ChoreGrid({ people, groupedChores, sortedCategories }) {
+function ChoreGrid({
+	people,
+	groupedChores,
+	sortedCategories,
+	onAssign,
+	onComplete,
+}) {
 	return (
 		<div
-			style={{
-				display: "grid",
-				gridTemplateColumns: `repeat(${people.length + 1}, 1fr)`,
-				gap: "10px",
-			}}
+			className="grid gap-4"
+			style={{ gridTemplateColumns: `repeat(${people.length + 1}, 1fr)` }}
 		>
 			<div></div>
 			{people.map((person) => (
-				<div key={person.id} style={{ fontWeight: "bold" }}>
+				<div
+					key={person.id}
+					className="font-bold text-center bg-gray-50 p-2 rounded"
+				>
 					{person.name}
 				</div>
 			))}
 			{sortedCategories.map((category) => (
 				<React.Fragment key={category}>
-					<h3 style={{ gridColumn: `span ${people.length + 1}` }}>
+					<h3 className="col-span-full text-lg font-semibold text-white bg-gray-800 p-2 rounded">
 						{category}
 					</h3>
 					{groupedChores[category]
 						.sort((a, b) => a.title.localeCompare(b.title))
 						.map((chore) => (
 							<React.Fragment key={chore.id}>
-								<div style={{ fontWeight: "bold" }}>{chore.title}</div>
-								{people.map((person) => {
-									const isAssigned =
-										chore.assignedTo && chore.assignedTo.includes(person.id);
-									return (
-										<div
-											key={person.id}
-											style={{
-												border: "1px solid #ccc",
-												padding: "5px",
-												textAlign: "center",
-											}}
-										>
-											{isAssigned ? "X" : ""}
-										</div>
-									);
-								})}
+								<div className="font-bold text-gray-700 bg-gray-50 p-2 rounded">
+									{chore.title}
+								</div>
+								{people.map((person) => (
+									<ChoreCell
+										key={person.id}
+										chore={chore}
+										person={person}
+										onAssign={onAssign}
+										onComplete={onComplete}
+									/>
+								))}
 							</React.Fragment>
 						))}
 				</React.Fragment>
