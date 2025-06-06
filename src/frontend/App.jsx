@@ -5,6 +5,7 @@ import {
 	fetchPeople,
 	fetchCurrentTimePeriod,
 	fetchAssignments,
+	fetchAvailableWeeks,
 	assignChore,
 	completeChore,
 	removeAssignment,
@@ -14,19 +15,52 @@ export default function App() {
 	const [chores, setChores] = useState([]);
 	const [people, setPeople] = useState([]);
 	const [timePeriod, setTimePeriod] = useState(null);
+	const [availableWeeks, setAvailableWeeks] = useState([]);
 
 	useEffect(() => {
-		fetchChores().then(setChores);
-		fetchPeople().then(setPeople);
-		fetchCurrentTimePeriod().then(setTimePeriod);
+		console.log("Fetching initial data...");
+		fetchChores().then((chores) => {
+			console.log("Fetched chores:", chores);
+			setChores(chores);
+		});
+		fetchPeople().then((people) => {
+			console.log("Fetched people:", people);
+			setPeople(people);
+		});
+		fetchAvailableWeeks().then((weeks) => {
+			console.log("Fetched available weeks:", weeks);
+			setAvailableWeeks(weeks);
+		});
+		fetchCurrentTimePeriod().then((period) => {
+			console.log("Fetched current time period:", period);
+			setTimePeriod(period);
+		});
 	}, []);
 
 	useEffect(() => {
-		if (!timePeriod) return;
+		if (!timePeriod) {
+			console.log("No time period selected.");
+			return;
+		}
+		console.log("Time period selected:", timePeriod);
 
-		fetchAssignments().then((assignments) => {
+		fetchAssignments(timePeriod.id).then((assignments) => {
+			console.log("Fetched assignments for time period:", assignments);
 			setChores((prevChores) => {
-				const updatedChores = prevChores.map((chore) => {
+				// Clear all assignments first
+				const clearedChores = prevChores.map((chore) => ({
+					...chore,
+					assignedTo: [],
+				}));
+				console.log("Cleared chores state:", clearedChores);
+
+				if (assignments.length === 0) {
+					console.log("No assignments found for the current time period.");
+					return clearedChores;
+				}
+
+				// Reassign based on fetched assignments
+				const updatedChores = clearedChores.map((chore) => {
 					const assignment = assignments.find(
 						(a) => a.chore_id === chore.id && a.time_period_id === timePeriod.id
 					);
@@ -37,9 +71,8 @@ export default function App() {
 						  }
 						: chore;
 				});
-				return JSON.stringify(updatedChores) === JSON.stringify(prevChores)
-					? prevChores
-					: updatedChores;
+				console.log("Updated chores state:", updatedChores);
+				return updatedChores;
 			});
 		});
 	}, [timePeriod]);
@@ -71,42 +104,86 @@ export default function App() {
 	const sortedCategories = Object.keys(groupedChores).sort();
 
 	function handleAssign(choreId, personId) {
+		if (!timePeriod || !timePeriod.id) {
+			console.error("Invalid timePeriod", timePeriod);
+			return;
+		}
+		console.log(
+			`Assigning chore ${choreId} to person ${personId} for time period ${timePeriod.id}`
+		);
 		assignChore(choreId, personId, timePeriod.id).then(() => {
-			setChores((prevChores) =>
-				prevChores.map((chore) =>
-					chore.id === choreId ? { ...chore, assignedTo: [personId] } : chore
-				)
-			);
-		});
-	}
-
-	function handleComplete(choreId) {
-		completeChore(choreId, timePeriod.id).then(() => {
-			setChores((prevChores) =>
-				prevChores.map((chore) =>
-					chore.id === choreId ? { ...chore, completed: true } : chore
-				)
-			);
-		});
-	}
-
-	function handleRemoveAssignment(choreId) {
-		console.log("Removing assignment for chore:", choreId);
-		removeAssignment(choreId, timePeriod.id).then(() => {
 			setChores((prevChores) => {
 				const updatedChores = prevChores.map((chore) =>
-					chore.id === choreId ? { ...chore, assignedTo: [] } : chore
+					chore.id === choreId ? { ...chore, assignedTo: [personId] } : chore
 				);
-				console.log("Updated chores state:", updatedChores);
+				console.log("Updated chores state after assignment:", updatedChores);
 				return updatedChores;
 			});
 		});
 	}
 
+	function handleComplete(choreId) {
+		console.log(`Completing chore ${choreId} for time period ${timePeriod.id}`);
+		completeChore(choreId, timePeriod.id).then(() => {
+			setChores((prevChores) => {
+				const updatedChores = prevChores.map((chore) =>
+					chore.id === choreId ? { ...chore, completed: true } : chore
+				);
+				console.log("Updated chores state after completion:", updatedChores);
+				return updatedChores;
+			});
+		});
+	}
+
+	function handleRemoveAssignment(choreId) {
+		console.log(
+			`Removing assignment for chore ${choreId} in time period ${timePeriod.id}`
+		);
+		removeAssignment(choreId, timePeriod.id).then(() => {
+			setChores((prevChores) => {
+				const updatedChores = prevChores.map((chore) =>
+					chore.id === choreId ? { ...chore, assignedTo: [] } : chore
+				);
+				console.log(
+					"Updated chores state after removing assignment:",
+					updatedChores
+				);
+				return updatedChores;
+			});
+		});
+	}
+
+	function handleWeekChange(event) {
+		const selectedId = parseInt(event.target.value, 10);
+		const selectedWeek = availableWeeks.find((week) => week.id === selectedId);
+		console.log("Selected week ID:", selectedId);
+		console.log("Available weeks:", availableWeeks);
+		if (selectedWeek) {
+			console.log("Week changed to:", selectedWeek);
+			setTimePeriod(selectedWeek);
+		} else {
+			console.error("Selected week not found in availableWeeks.");
+		}
+	}
+
 	return (
-		<div>
-			<h1>Simple Chore Tracker</h1>
-			{timePeriod && <h2>Week of {formatDate(timePeriod.start_date)}</h2>}
+		<div className="p-4">
+			<h1 className="text-6xl">Simple Chore Tracker</h1>
+			{timePeriod && (
+				<div>
+					<select
+						id="week-select"
+						value={timePeriod.id}
+						onChange={handleWeekChange}
+					>
+						{availableWeeks.map((week) => (
+							<option key={week.id} value={week.id}>
+								Week of {formatDate(week.start_date)}
+							</option>
+						))}
+					</select>
+				</div>
+			)}
 			<ChoreGrid
 				people={people}
 				groupedChores={groupedChores}

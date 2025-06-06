@@ -14,7 +14,9 @@ export async function fetchCurrentTimePeriod() {
 }
 
 export async function fetchAssignments(timePeriodId) {
-	const response = await fetch(`/api/assignments?timePeriodId=${timePeriodId}`);
+	const response = await fetch(
+		`/api/chores/assignments?timePeriodId=${timePeriodId}`
+	);
 	if (!response.ok) {
 		throw new Error("Failed to fetch assignments");
 	}
