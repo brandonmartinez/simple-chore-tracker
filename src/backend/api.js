@@ -29,11 +29,54 @@ router.get("/chores", async (req, res) => {
 });
 
 router.post("/chores", async (req, res) => {
-	const query = req.app.locals.db("Chores").insert(req.body);
-	logger.info(`Executing query: ${query.toString()}`);
-	const [id] = await query;
-	logger.info(`Query results: ${JSON.stringify({ id })}`);
-	res.json({ id });
+	try {
+		const [id] = await req.app.locals
+			.db("Chores")
+			.insert(req.body)
+			.returning("id");
+		logger.info(`Inserted chore with ID: ${id}`);
+		res.json({ id });
+	} catch (error) {
+		logger.error("Error inserting chore:", error);
+		res.status(500).json({ error: "Failed to add chore." });
+	}
+});
+
+// Update endpoint to handle general chore updates
+router.patch("/chores/:id", async (req, res) => {
+	const { id } = req.params;
+	const updates = req.body;
+
+	if (!updates || typeof updates !== "object") {
+		return res.status(400).json({ error: "Invalid updates object" });
+	}
+
+	try {
+		const existingChore = await req.app.locals
+			.db("Chores")
+			.where({ id })
+			.first();
+		if (!existingChore) {
+			return res.status(404).json({ error: "Chore not found" });
+		}
+
+		const filteredUpdates = Object.keys(updates).reduce((acc, key) => {
+			if (updates[key] !== existingChore[key]) {
+				acc[key] = updates[key];
+			}
+			return acc;
+		}, {});
+
+		if (Object.keys(filteredUpdates).length === 0 && !updates.deleted) {
+			return res.status(400).json({ error: "No changes detected" });
+		}
+
+		await req.app.locals.db("Chores").where({ id }).update(filteredUpdates);
+		res.status(200).json({ success: true });
+	} catch (error) {
+		console.error("Error updating chore:", error);
+		res.status(500).json({ error: "Failed to update chore" });
+	}
 });
 
 // Update endpoints to be under '/chores/assignments/available'

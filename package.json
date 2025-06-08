@@ -5,12 +5,15 @@
 	"main": "index.js",
 	"type": "module",
 	"scripts": {
-		"dev": "concurrently \"vite --host\" \"nodemon src/backend/server.js\"",
-		"build": "vite build",
-		"start": "node src/backend/server.js",
+		"dev:frontend": "vite --host",
+		"dev:backend": "nodemon src/backend/server.js",
+		"dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+		"prod:build": "vite build",
+		"prod:serve": "node src/backend/server.js",
+		"prod": "npm run prod:build && npm run prod:serve",
 		"db:migrate": "npx knex migrate:latest --knexfile ./knexfile.cjs",
 		"db:seed": "npx knex seed:run --knexfile ./knexfile.cjs",
-		"db:migrate:new": "bash -c 'read -p \"Enter migration name: \" name; sanitized=$(echo \"$name\" | tr -s \" \" | tr \"[:upper:]\" \"[:lower:]\" | tr \" \" \"_\"); timestamp=$(date +\"%Y%m%d_%H%M%S\"); knex migrate:make \"$timestamp_$sanitized\"'"
+		"db:migrate:new": "bash -c 'read -p \"Enter migration name: \" name; sanitized=$(echo \"$name\" | tr -s \" \" | tr \"[:upper:]\" \"[:lower:]\" | tr \" \" \"_\"); timestamp=$(date +\"%Y%m%d_%H%M%S\"); npx knex migrate:make \"$timestamp_$sanitized\" --knexfile ./knexfile.cjs'"
 	},
 	"keywords": [],
 	"author": "",
@@ -29,6 +32,7 @@
 		"pg": "^8.16.0",
 		"react": "^19.1.0",
 		"react-dom": "^19.1.0",
+		"react-router-dom": "^7.6.2",
 		"winston": "^3.17.0"
 	},
 	"devDependencies": {

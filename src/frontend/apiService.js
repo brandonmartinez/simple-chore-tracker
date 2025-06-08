@@ -61,3 +61,44 @@ export async function fetchAvailableWeeks() {
 	}
 	return response.json();
 }
+
+export async function addChore(newChore) {
+	newChore.points = Number(newChore.points);
+	if (isNaN(newChore.points) || newChore.points <= 0) {
+		throw new Error("Invalid chore points");
+	}
+
+	if (!newChore.title || typeof newChore.title !== "string") {
+		throw new Error("Invalid chore title");
+	}
+	if (!newChore.category || typeof newChore.category !== "string") {
+		throw new Error("Invalid chore category");
+	}
+
+	console.log("Sending chore to API:", newChore);
+	const response = await fetch("/api/chores", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(newChore),
+	});
+
+	if (!response.ok) {
+		const errorText = await response.text();
+		console.error("API error response:", errorText);
+		throw new Error("Failed to add chore");
+	}
+
+	return response.json();
+}
+
+export async function markChoreAsDeleted(choreId) {
+	const response = await fetch(`/api/chores/${choreId}`, {
+		method: "PATCH",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ deleted: true }),
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to mark chore as deleted");
+	}
+}

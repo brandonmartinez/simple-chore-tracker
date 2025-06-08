@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import ChoreGrid from "./ChoreGrid";
+import {
+	BrowserRouter as Router,
+	Route,
+	Routes,
+	Navigate,
+} from "react-router-dom";
+import ChoreGrid from "./components/ChoreGrid";
+import ChoreEditor from "./components/ChoreEditor";
+import Navbar from "./components/Navbar";
 import {
 	fetchChores,
 	fetchPeople,
@@ -77,21 +85,6 @@ export default function App() {
 		});
 	}, [timePeriod]);
 
-	function formatDate(dateStr) {
-		// Parse as UTC if dateStr is in 'YYYY-MM-DD' format to avoid timezone issues
-		let date;
-		if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-			const [year, month, day] = dateStr.split("-");
-			date = new Date(Date.UTC(year, month - 1, day));
-		} else {
-			date = new Date(dateStr);
-		}
-		const mm = String(date.getUTCMonth() + 1).padStart(2, "0");
-		const dd = String(date.getUTCDate()).padStart(2, "0");
-		const yyyy = date.getUTCFullYear();
-		return `${mm}/${dd}/${yyyy}`;
-	}
-
 	const groupedChores = chores.reduce((acc, chore) => {
 		const category = chore.category || "Uncategorized";
 		if (!acc[category]) {
@@ -153,7 +146,7 @@ export default function App() {
 		});
 	}
 
-	function handleWeekChange(event) {
+	function handleTimePeriodChange(event) {
 		const selectedId = parseInt(event.target.value, 10);
 		const selectedWeek = availableWeeks.find((week) => week.id === selectedId);
 		console.log("Selected week ID:", selectedId);
@@ -167,31 +160,53 @@ export default function App() {
 	}
 
 	return (
-		<div className="p-4">
-			<h1 className="text-6xl">Simple Chore Tracker</h1>
-			{timePeriod && (
-				<div>
-					<select
-						id="week-select"
-						value={timePeriod.id}
-						onChange={handleWeekChange}
-					>
-						{availableWeeks.map((week) => (
-							<option key={week.id} value={week.id}>
-								Week of {formatDate(week.start_date)}
-							</option>
-						))}
-					</select>
-				</div>
-			)}
-			<ChoreGrid
-				people={people}
-				groupedChores={groupedChores}
-				sortedCategories={sortedCategories}
-				onAssign={handleAssign}
-				onComplete={handleComplete}
-				onRemoveAssignment={handleRemoveAssignment}
-			/>
-		</div>
+		<Router>
+			<div className="p-4">
+				<Navbar />
+				<Routes>
+					<Route path="/" element={<Navigate to="/chores" replace />} />
+					<Route
+						path="/chores"
+						element={
+							<ChoreGrid
+								people={people}
+								groupedChores={groupedChores}
+								sortedCategories={sortedCategories}
+								timePeriod={timePeriod}
+								availableTimePeriods={availableWeeks}
+								onAssign={handleAssign}
+								onComplete={handleComplete}
+								onTimePeriodChange={handleTimePeriodChange}
+								onRemoveAssignment={handleRemoveAssignment}
+							/>
+						}
+					/>
+					<Route
+						path="/chores/editor"
+						element={
+							<ChoreEditor
+								chores={chores}
+								setChores={setChores}
+								onAddChore={(newChore) => {
+									setChores((prevChores) => [...prevChores, newChore]);
+								}}
+								onUpdateChore={(id, updatedChore) => {
+									setChores((prevChores) =>
+										prevChores.map((chore) =>
+											chore.id === id ? updatedChore : chore
+										)
+									);
+								}}
+							/>
+						}
+					/>
+					<Route path="/people" element={<div>People Component</div>} />
+					<Route
+						path="/time-periods"
+						element={<div>Time Period Component</div>}
+					/>
+				</Routes>
+			</div>
+		</Router>
 	);
 }
