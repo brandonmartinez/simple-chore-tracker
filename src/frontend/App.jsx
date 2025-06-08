@@ -96,69 +96,6 @@ export default function App() {
 
 	const sortedCategories = Object.keys(groupedChores).sort();
 
-	function handleAssign(choreId, personId) {
-		if (!timePeriod || !timePeriod.id) {
-			console.error("Invalid timePeriod", timePeriod);
-			return;
-		}
-		console.log(
-			`Assigning chore ${choreId} to person ${personId} for time period ${timePeriod.id}`
-		);
-		assignChore(choreId, personId, timePeriod.id).then(() => {
-			setChores((prevChores) => {
-				const updatedChores = prevChores.map((chore) =>
-					chore.id === choreId ? { ...chore, assignedTo: [personId] } : chore
-				);
-				console.log("Updated chores state after assignment:", updatedChores);
-				return updatedChores;
-			});
-		});
-	}
-
-	function handleComplete(choreId) {
-		console.log(`Completing chore ${choreId} for time period ${timePeriod.id}`);
-		completeChore(choreId, timePeriod.id).then(() => {
-			setChores((prevChores) => {
-				const updatedChores = prevChores.map((chore) =>
-					chore.id === choreId ? { ...chore, completed: true } : chore
-				);
-				console.log("Updated chores state after completion:", updatedChores);
-				return updatedChores;
-			});
-		});
-	}
-
-	function handleRemoveAssignment(choreId) {
-		console.log(
-			`Removing assignment for chore ${choreId} in time period ${timePeriod.id}`
-		);
-		removeAssignment(choreId, timePeriod.id).then(() => {
-			setChores((prevChores) => {
-				const updatedChores = prevChores.map((chore) =>
-					chore.id === choreId ? { ...chore, assignedTo: [] } : chore
-				);
-				console.log(
-					"Updated chores state after removing assignment:",
-					updatedChores
-				);
-				return updatedChores;
-			});
-		});
-	}
-
-	function handleTimePeriodChange(event) {
-		const selectedId = parseInt(event.target.value, 10);
-		const selectedWeek = availableWeeks.find((week) => week.id === selectedId);
-		console.log("Selected week ID:", selectedId);
-		console.log("Available weeks:", availableWeeks);
-		if (selectedWeek) {
-			console.log("Week changed to:", selectedWeek);
-			setTimePeriod(selectedWeek);
-		} else {
-			console.error("Selected week not found in availableWeeks.");
-		}
-	}
-
 	return (
 		<Router>
 			<div className="p-4">
@@ -174,10 +111,8 @@ export default function App() {
 								sortedCategories={sortedCategories}
 								timePeriod={timePeriod}
 								availableTimePeriods={availableWeeks}
-								onAssign={handleAssign}
-								onComplete={handleComplete}
-								onTimePeriodChange={handleTimePeriodChange}
-								onRemoveAssignment={handleRemoveAssignment}
+								setTimePeriod={setTimePeriod}
+								setChores={setChores}
 							/>
 						}
 					/>

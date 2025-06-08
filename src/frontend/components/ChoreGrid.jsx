@@ -1,5 +1,6 @@
 import React from "react";
 import ChoreCell from "./ChoreCell";
+import { assignChore, completeChore, removeAssignment } from "../apiService";
 
 function ChoreGrid({
 	people,
@@ -7,10 +8,8 @@ function ChoreGrid({
 	sortedCategories,
 	timePeriod,
 	availableTimePeriods,
-	onAssign,
-	onComplete,
-	onRemoveAssignment,
-	onTimePeriodChange,
+	setTimePeriod,
+	setChores,
 }) {
 	function formatDate(dateStr) {
 		// Parse as UTC if dateStr is in 'YYYY-MM-DD' format to avoid timezone issues
@@ -27,6 +26,55 @@ function ChoreGrid({
 		return `${mm}/${dd}/${yyyy}`;
 	}
 
+	function handleAssign(choreId, personId) {
+		if (!timePeriod || !timePeriod.id) {
+			console.error("Invalid timePeriod", timePeriod);
+			return;
+		}
+		assignChore(choreId, personId, timePeriod.id).then(() => {
+			setChores((prevChores) => {
+				const updatedChores = prevChores.map((chore) =>
+					chore.id === choreId ? { ...chore, assignedTo: [personId] } : chore
+				);
+				return updatedChores;
+			});
+		});
+	}
+
+	function handleComplete(choreId) {
+		completeChore(choreId, timePeriod.id).then(() => {
+			setChores((prevChores) => {
+				const updatedChores = prevChores.map((chore) =>
+					chore.id === choreId ? { ...chore, completed: true } : chore
+				);
+				return updatedChores;
+			});
+		});
+	}
+
+	function handleRemoveAssignment(choreId) {
+		removeAssignment(choreId, timePeriod.id).then(() => {
+			setChores((prevChores) => {
+				const updatedChores = prevChores.map((chore) =>
+					chore.id === choreId ? { ...chore, assignedTo: [] } : chore
+				);
+				return updatedChores;
+			});
+		});
+	}
+
+	function handleTimePeriodChange(event) {
+		const selectedId = parseInt(event.target.value, 10);
+		const selectedWeek = availableTimePeriods.find(
+			(week) => week.id === selectedId
+		);
+		if (selectedWeek) {
+			setTimePeriod(selectedWeek);
+		} else {
+			console.error("Selected week not found in availableWeeks.");
+		}
+	}
+
 	return (
 		<div
 			className="gap-4 grid"
@@ -38,7 +86,7 @@ function ChoreGrid({
 				<select
 					id="week-select"
 					value={timePeriod?.id || availableTimePeriods[0]?.id || ""}
-					onChange={onTimePeriodChange}
+					onChange={handleTimePeriodChange}
 					className="p-2 border rounded"
 				>
 					{availableTimePeriods.map((week) => (
@@ -74,9 +122,9 @@ function ChoreGrid({
 										key={person.id}
 										chore={chore}
 										person={person}
-										onAssign={onAssign}
-										onComplete={onComplete}
-										onRemoveAssignment={onRemoveAssignment}
+										onAssign={handleAssign}
+										onComplete={handleComplete}
+										onRemoveAssignment={handleRemoveAssignment}
 									/>
 								))}
 								<div className="flex justify-center items-center bg-gray-700 p-1 rounded font-bold text-gray-300 text-sm">
