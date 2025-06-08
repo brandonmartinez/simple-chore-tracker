@@ -9,6 +9,7 @@ import ChoreGrid from "./components/ChoreGrid";
 import ChoreEditor from "./components/ChoreEditor";
 import Navbar from "./components/Navbar";
 import RewardEditor from "./components/RewardEditor";
+import TimePeriodEditor from "./components/TimePeriodEditor";
 import {
 	fetchChores,
 	fetchPeople,
@@ -144,8 +145,26 @@ export default function App() {
 					/>
 					<Route path="/people" element={<div>People Component</div>} />
 					<Route
-						path="/time-periods"
-						element={<div>Time Period Component</div>}
+						path="/time-periods/editor"
+						element={
+							<TimePeriodEditor
+								timePeriods={availableWeeks}
+								setTimePeriods={setAvailableWeeks}
+								onAddTimePeriod={(newTimePeriod) => {
+									setAvailableWeeks((prevWeeks) => [
+										...prevWeeks,
+										newTimePeriod,
+									]);
+								}}
+								onUpdateTimePeriod={(id, updatedTimePeriod) => {
+									setAvailableWeeks((prevWeeks) =>
+										prevWeeks.map((week) =>
+											week.id === id ? updatedTimePeriod : week
+										)
+									);
+								}}
+							/>
+						}
 					/>
 					<Route
 						path="/rewards/editor"

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { addReward, markRewardAsDeleted } from "../apiService";
+import EditorGrid from "./EditorGrid";
 
 function RewardEditor({ rewards, setRewards, onAddReward, onUpdateReward }) {
 	const [newReward, setNewReward] = useState({
@@ -71,108 +72,29 @@ function RewardEditor({ rewards, setRewards, onAddReward, onUpdateReward }) {
 		}
 	};
 
+	const columns = [
+		{ key: "title", label: "Title", onSort: () => handleSort("title") },
+		{
+			key: "points_cost",
+			label: "Points Cost",
+			onSort: () => handleSort("points_cost"),
+			type: "number",
+		},
+	];
+
 	return (
 		<div>
 			<h2 className="mb-4 text-2xl">Reward Editor</h2>
-			<table className="border border-collapse border-gray-300 w-full table-auto">
-				<thead>
-					<tr className="bg-gray-100">
-						<th
-							className="px-4 py-2 border border-gray-300 cursor-pointer"
-							onClick={() => handleSort("id")}
-						>
-							ID
-						</th>
-						<th
-							className="px-4 py-2 border border-gray-300 cursor-pointer"
-							onClick={() => handleSort("title")}
-						>
-							Title
-						</th>
-						<th
-							className="px-4 py-2 border border-gray-300 cursor-pointer"
-							onClick={() => handleSort("points_cost")}
-						>
-							Points Cost
-						</th>
-						<th className="px-4 py-2 border border-gray-300">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					{sortedRewards.map((reward) => (
-						<tr key={String(reward.id)} className="hover:bg-gray-50">
-							<td className="px-4 py-2 border border-gray-300">
-								{String(reward.id)}
-							</td>
-							<td className="px-4 py-2 border border-gray-300">
-								<input
-									type="text"
-									value={reward.title || ""}
-									onChange={(e) =>
-										handleEdit(reward.id, "title", e.target.value)
-									}
-									className="p-2 border border-gray-300 rounded w-full"
-								/>
-							</td>
-							<td className="px-4 py-2 border border-gray-300">
-								<input
-									type="number"
-									value={reward.points_cost || 0}
-									onChange={(e) =>
-										handleEdit(reward.id, "points_cost", e.target.value)
-									}
-									className="p-2 border border-gray-300 rounded w-full"
-								/>
-							</td>
-							<td className="px-4 py-2 border border-gray-300">
-								<button
-									onClick={() => handleSave(reward.id)}
-									className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-white"
-								>
-									Save
-								</button>
-								<button
-									onClick={() => handleDelete(reward.id)}
-									className="bg-red-500 hover:bg-red-600 ml-2 px-4 py-2 rounded text-white"
-								>
-									Delete
-								</button>
-							</td>
-						</tr>
-					))}
-					<tr className="hover:bg-gray-50">
-						<td className="px-4 py-2 border border-gray-300">New</td>
-						<td className="px-4 py-2 border border-gray-300">
-							<input
-								type="text"
-								value={newReward.title || ""}
-								onChange={(e) =>
-									setNewReward({ ...newReward, title: e.target.value })
-								}
-								className="p-2 border border-gray-300 rounded w-full"
-							/>
-						</td>
-						<td className="px-4 py-2 border border-gray-300">
-							<input
-								type="number"
-								value={newReward.points_cost || 0}
-								onChange={(e) =>
-									setNewReward({ ...newReward, points_cost: e.target.value })
-								}
-								className="p-2 border border-gray-300 rounded w-full"
-							/>
-						</td>
-						<td className="px-4 py-2 border border-gray-300">
-							<button
-								onClick={handleAdd}
-								className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded text-white"
-							>
-								Add
-							</button>
-						</td>
-					</tr>
-				</tbody>
-			</table>
+			<EditorGrid
+				items={sortedRewards}
+				columns={columns}
+				onEdit={handleEdit}
+				onSave={handleSave}
+				onDelete={handleDelete}
+				onAdd={handleAdd}
+				newItem={newReward}
+				setNewItem={setNewReward}
+			/>
 		</div>
 	);
 }

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { addChore, markChoreAsDeleted } from "../apiService";
+import EditorGrid from "./EditorGrid";
 
 function ChoreEditor({ chores, setChores, onAddChore, onUpdateChore }) {
 	const [newChore, setNewChore] = useState({
@@ -72,134 +73,34 @@ function ChoreEditor({ chores, setChores, onAddChore, onUpdateChore }) {
 		}
 	};
 
+	const columns = [
+		{
+			key: "category",
+			label: "Category",
+			onSort: () => handleSort("category"),
+		},
+		{ key: "title", label: "Title", onSort: () => handleSort("title") },
+		{
+			key: "points",
+			label: "Points",
+			onSort: () => handleSort("points"),
+			type: "number",
+		},
+	];
+
 	return (
 		<div>
 			<h2 className="mb-4 text-2xl">Chore Editor</h2>
-			<table className="border border-collapse border-gray-300 w-full table-auto">
-				<thead>
-					<tr className="bg-gray-100">
-						<th
-							className="px-4 py-2 border border-gray-300 cursor-pointer"
-							onClick={() => handleSort("id")}
-						>
-							ID
-						</th>
-						<th
-							className="px-4 py-2 border border-gray-300 cursor-pointer"
-							onClick={() => handleSort("category")}
-						>
-							Category
-						</th>
-						<th
-							className="px-4 py-2 border border-gray-300 cursor-pointer"
-							onClick={() => handleSort("title")}
-						>
-							Title
-						</th>
-						<th
-							className="px-4 py-2 border border-gray-300 cursor-pointer"
-							onClick={() => handleSort("points")}
-						>
-							Points
-						</th>
-						<th className="px-4 py-2 border border-gray-300">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					{sortedChores.map((chore) => (
-						<tr key={String(chore.id)} className="hover:bg-gray-50">
-							<td className="px-4 py-2 border border-gray-300">
-								{String(chore.id)}
-							</td>
-							<td className="px-4 py-2 border border-gray-300">
-								<input
-									type="text"
-									value={chore.category || ""}
-									onChange={(e) =>
-										handleEdit(chore.id, "category", e.target.value)
-									}
-									className="p-2 border border-gray-300 rounded w-full"
-								/>
-							</td>
-							<td className="px-4 py-2 border border-gray-300">
-								<input
-									type="text"
-									value={chore.title || ""}
-									onChange={(e) =>
-										handleEdit(chore.id, "title", e.target.value)
-									}
-									className="p-2 border border-gray-300 rounded w-full"
-								/>
-							</td>
-							<td className="px-4 py-2 border border-gray-300">
-								<input
-									type="number"
-									value={chore.points || 0}
-									onChange={(e) =>
-										handleEdit(chore.id, "points", e.target.value)
-									}
-									className="p-2 border border-gray-300 rounded w-full"
-								/>
-							</td>
-							<td className="px-4 py-2 border border-gray-300">
-								<button
-									onClick={() => handleSave(chore.id)}
-									className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-white"
-								>
-									Save
-								</button>
-								<button
-									onClick={() => handleDelete(chore.id)}
-									className="bg-red-500 hover:bg-red-600 ml-2 px-4 py-2 rounded text-white"
-								>
-									Delete
-								</button>
-							</td>
-						</tr>
-					))}
-					<tr className="hover:bg-gray-50">
-						<td className="px-4 py-2 border border-gray-300">New</td>
-						<td className="px-4 py-2 border border-gray-300">
-							<input
-								type="text"
-								value={newChore.category || ""}
-								onChange={(e) =>
-									setNewChore({ ...newChore, category: e.target.value })
-								}
-								className="p-2 border border-gray-300 rounded w-full"
-							/>
-						</td>
-						<td className="px-4 py-2 border border-gray-300">
-							<input
-								type="text"
-								value={newChore.title || ""}
-								onChange={(e) =>
-									setNewChore({ ...newChore, title: e.target.value })
-								}
-								className="p-2 border border-gray-300 rounded w-full"
-							/>
-						</td>
-						<td className="px-4 py-2 border border-gray-300">
-							<input
-								type="number"
-								value={newChore.points || 0}
-								onChange={(e) =>
-									setNewChore({ ...newChore, points: e.target.value })
-								}
-								className="p-2 border border-gray-300 rounded w-full"
-							/>
-						</td>
-						<td className="px-4 py-2 border border-gray-300">
-							<button
-								onClick={handleAdd}
-								className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded text-white"
-							>
-								Add
-							</button>
-						</td>
-					</tr>
-				</tbody>
-			</table>
+			<EditorGrid
+				items={sortedChores}
+				columns={columns}
+				onEdit={handleEdit}
+				onSave={handleSave}
+				onDelete={handleDelete}
+				onAdd={handleAdd}
+				newItem={newChore}
+				setNewItem={setNewChore}
+			/>
 		</div>
 	);
 }

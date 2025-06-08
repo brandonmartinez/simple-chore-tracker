@@ -87,10 +87,14 @@ function ChoreGrid({
 					id="week-select"
 					value={timePeriod?.id || availableTimePeriods[0]?.id || ""}
 					onChange={handleTimePeriodChange}
-					className="p-2 border rounded"
+					className="bg-slate-200 dark:bg-slate-700 p-2 border border-slate-300 dark:border-slate-600 rounded text-slate-800 dark:text-slate-100"
 				>
 					{availableTimePeriods.map((week) => (
-						<option key={week.id} value={week.id}>
+						<option
+							key={week.id}
+							value={week.id}
+							className="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100"
+						>
 							{formatDate(week.start_date)}
 						</option>
 					))}
@@ -99,7 +103,7 @@ function ChoreGrid({
 			{people.map((person) => (
 				<div
 					key={person.id}
-					className="bg-gray-50 p-2 rounded font-bold text-center text-gray-700"
+					className="bg-slate-300 dark:bg-slate-600 p-2 rounded font-bold text-center text-slate-800 dark:text-slate-100"
 				>
 					{person.name}
 				</div>
@@ -107,14 +111,14 @@ function ChoreGrid({
 			<div></div>
 			{sortedCategories.map((category) => (
 				<React.Fragment key={category}>
-					<h3 className="col-span-full bg-gray-800 p-2 rounded font-semibold text-lg text-white">
+					<h3 className="col-span-full bg-slate-400 dark:bg-slate-700 p-2 rounded font-semibold text-lg text-slate-800 dark:text-slate-100">
 						{category}
 					</h3>
 					{groupedChores[category]
 						.sort((a, b) => a.title.localeCompare(b.title))
 						.map((chore) => (
 							<React.Fragment key={chore.id}>
-								<div className="flex items-center bg-gray-50 p-2 rounded font-bold text-gray-700">
+								<div className="flex items-center bg-slate-300 dark:bg-slate-600 p-2 rounded font-bold text-slate-800 dark:text-slate-100">
 									{chore.title}
 								</div>
 								{people.map((person) => (
@@ -127,7 +131,7 @@ function ChoreGrid({
 										onRemoveAssignment={handleRemoveAssignment}
 									/>
 								))}
-								<div className="flex justify-center items-center bg-gray-700 p-1 rounded font-bold text-gray-300 text-sm">
+								<div className="flex justify-center items-center bg-slate-400 dark:bg-slate-700 p-1 rounded font-bold text-slate-800 text-sm dark:text-slate-100">
 									+{chore.points}
 								</div>
 							</React.Fragment>
