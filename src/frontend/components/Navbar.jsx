@@ -33,6 +33,12 @@ export default function Navbar() {
 					>
 						Time Period
 					</Link>
+					<Link
+						to="/rewards/editor"
+						className="bg-gray-200 hover:bg-blue-500 px-4 py-2 rounded hover:text-white"
+					>
+						Reward Editor
+					</Link>
 				</nav>
 			</div>
 		</div>

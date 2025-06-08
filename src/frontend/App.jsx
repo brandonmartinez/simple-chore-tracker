@@ -8,12 +8,14 @@ import {
 import ChoreGrid from "./components/ChoreGrid";
 import ChoreEditor from "./components/ChoreEditor";
 import Navbar from "./components/Navbar";
+import RewardEditor from "./components/RewardEditor";
 import {
 	fetchChores,
 	fetchPeople,
 	fetchCurrentTimePeriod,
 	fetchAssignments,
 	fetchAvailableWeeks,
+	fetchRewards,
 	assignChore,
 	completeChore,
 	removeAssignment,
@@ -24,6 +26,7 @@ export default function App() {
 	const [people, setPeople] = useState([]);
 	const [timePeriod, setTimePeriod] = useState(null);
 	const [availableWeeks, setAvailableWeeks] = useState([]);
+	const [rewards, setRewards] = useState([]);
 
 	useEffect(() => {
 		console.log("Fetching initial data...");
@@ -42,6 +45,10 @@ export default function App() {
 		fetchCurrentTimePeriod().then((period) => {
 			console.log("Fetched current time period:", period);
 			setTimePeriod(period);
+		});
+		fetchRewards().then((fetchedRewards) => {
+			console.log("Fetched rewards:", fetchedRewards);
+			setRewards(fetchedRewards);
 		});
 	}, []);
 
@@ -139,6 +146,25 @@ export default function App() {
 					<Route
 						path="/time-periods"
 						element={<div>Time Period Component</div>}
+					/>
+					<Route
+						path="/rewards/editor"
+						element={
+							<RewardEditor
+								rewards={rewards}
+								setRewards={setRewards}
+								onAddReward={(newReward) => {
+									setRewards((prevRewards) => [...prevRewards, newReward]);
+								}}
+								onUpdateReward={(id, updatedReward) => {
+									setRewards((prevRewards) =>
+										prevRewards.map((reward) =>
+											reward.id === id ? updatedReward : reward
+										)
+									);
+								}}
+							/>
+						}
 					/>
 				</Routes>
 			</div>

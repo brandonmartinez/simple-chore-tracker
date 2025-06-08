@@ -102,3 +102,46 @@ export async function markChoreAsDeleted(choreId) {
 		throw new Error("Failed to mark chore as deleted");
 	}
 }
+
+export async function fetchRewards() {
+	const response = await fetch("/api/rewards");
+	return response.json();
+}
+
+export async function addReward(newReward) {
+	newReward.points_cost = Number(newReward.points_cost);
+	if (isNaN(newReward.points_cost) || newReward.points_cost <= 0) {
+		throw new Error("Invalid reward points cost");
+	}
+
+	if (!newReward.title || typeof newReward.title !== "string") {
+		throw new Error("Invalid reward title");
+	}
+
+	console.log("Sending reward to API:", newReward);
+	const response = await fetch("/api/rewards", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(newReward),
+	});
+
+	if (!response.ok) {
+		const errorText = await response.text();
+		console.error("API error response:", errorText);
+		throw new Error("Failed to add reward");
+	}
+
+	return response.json();
+}
+
+export async function markRewardAsDeleted(rewardId) {
+	const response = await fetch(`/api/rewards/${rewardId}`, {
+		method: "PATCH",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ deleted: true }),
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to mark reward as deleted");
+	}
+}
