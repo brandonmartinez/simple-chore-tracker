@@ -98,8 +98,8 @@ export default function App() {
 
 	return (
 		<Router>
+			<Navbar />
 			<div className="p-4">
-				<Navbar />
 				<Routes>
 					<Route path="/" element={<Navigate to="/chores" replace />} />
 					<Route
