@@ -8,14 +8,19 @@ function EditorGrid({
 	onAdd,
 	onUpdate,
 	onDelete,
+	newTemplate,
 }) {
-	const [newItem, setNewItem] = useState(() => {
-		const defaultValues = columns.reduce((acc, column) => {
+	const defaultNewTemplate = () => {
+		return columns.reduce((acc, column) => {
 			acc[column.key] = column.defaultValue || "";
 			return acc;
 		}, {});
-		return defaultValues;
-	});
+	};
+
+	const createNewItem =
+		typeof newTemplate === "function" ? newTemplate : defaultNewTemplate;
+
+	const [newItem, setNewItem] = useState(createNewItem);
 	const [sortConfig, setSortConfig] = useState({
 		key: config.defaultSort || "id",
 		direction: "asc",
@@ -109,6 +114,20 @@ function EditorGrid({
 			if (saveButton) {
 				saveButton.classList.remove("animate-pulse");
 			}
+		}
+	};
+
+	const handleAdd = async () => {
+		if (Object.values(newItem).some((value) => value === "")) {
+			alert("Please fill in all fields before adding a new item.");
+			return;
+		}
+		try {
+			const addedItem = await onAdd(newItem);
+			setItems((prevItems) => [...prevItems, addedItem]);
+			setNewItem(createNewItem);
+		} catch (error) {
+			console.error(`Failed to add new ${config.singular}:`, error);
 		}
 	};
 
@@ -221,7 +240,7 @@ function EditorGrid({
 					))}
 					<td className="px-4 py-2">
 						<button
-							onClick={onAdd}
+							onClick={handleAdd}
 							className="bg-sky-500 hover:bg-sky-600 px-4 py-2 rounded text-white"
 						>
 							Add

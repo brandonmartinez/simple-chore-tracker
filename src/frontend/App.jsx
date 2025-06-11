@@ -29,8 +29,48 @@ export default function App() {
 	const [timePeriods, setTimePeriods] = useState([]);
 	const [rewards, setRewards] = useState([]);
 
-	useEffect(() => {
-		logger.info("Fetching initial data...");
+	function fetchDataAndSetStateAfterTimePeriodChange() {
+		// Fetch chore assignments if a time period is selected
+		if (timePeriod) {
+			logger.info("Fetching chore assignments for time period:", timePeriod);
+			fetchChoreAssignments({ timePeriodId: timePeriod.id }).then(
+				(assignments) => {
+					logger.info("Fetched assignments for time period:", assignments);
+					setChores((prevChores) => {
+						const clearedChores = prevChores.map((chore) => ({
+							...chore,
+							assignedTo: [],
+						}));
+
+						if (assignments.length === 0) {
+							logger.warn("No assignments found for the current time period.");
+							return clearedChores;
+						}
+
+						const updatedChores = clearedChores.map((chore) => {
+							const assignment = assignments.find(
+								(a) =>
+									a.chore_id === chore.id && a.time_period_id === timePeriod.id
+							);
+							return assignment
+								? {
+										...chore,
+										assignedTo: assignment.person_id
+											? [assignment.person_id]
+											: [],
+								  }
+								: chore;
+						});
+						logger.info("Updated chores state:", updatedChores);
+						return updatedChores;
+					});
+				}
+			);
+		}
+	}
+
+	function fetchDataAndSetState() {
+		logger.info("Fetching data...");
 		fetchChores().then((chores) => {
 			logger.info("Fetched chores:", chores);
 			setChores(chores);
@@ -51,52 +91,25 @@ export default function App() {
 			logger.info("Fetched rewards:", fetchedRewards);
 			setRewards(fetchedRewards);
 		});
-	}, []);
+	}
 
 	useEffect(() => {
-		if (!timePeriod) {
-			logger.warn("No time period selected.");
-			return;
-		}
-		logger.info("Time period selected:", timePeriod);
-
-		fetchChoreAssignments({ timePeriodId: timePeriod.id }).then(
-			(assignments) => {
-				logger.info("Fetched assignments for time period:", assignments);
-				setChores((prevChores) => {
-					// Clear all assignments first
-					const clearedChores = prevChores.map((chore) => ({
-						...chore,
-						assignedTo: [],
-					}));
-					logger.info("Cleared chores state:", clearedChores);
-
-					if (assignments.length === 0) {
-						logger.warn("No assignments found for the current time period.");
-						return clearedChores;
-					}
-
-					// Reassign based on fetched assignments
-					const updatedChores = clearedChores.map((chore) => {
-						const assignment = assignments.find(
-							(a) =>
-								a.chore_id === chore.id && a.time_period_id === timePeriod.id
-						);
-						return assignment
-							? {
-									...chore,
-									assignedTo: assignment.person_id
-										? [assignment.person_id]
-										: [],
-							  }
-							: chore;
-					});
-					logger.info("Updated chores state:", updatedChores);
-					return updatedChores;
-				});
-			}
-		);
+		fetchDataAndSetState();
+	}, []);
+	useEffect(() => {
+		fetchDataAndSetStateAfterTimePeriodChange();
 	}, [timePeriod]);
+
+	useEffect(() => {
+		const intervalId = setInterval(() => {
+			logger.info("Refreshing data...");
+			fetchDataAndSetState();
+			fetchDataAndSetStateAfterTimePeriodChange();
+		}, 1000 * 60 * 1);
+
+		// Cleanup interval on component unmount
+		return () => clearInterval(intervalId);
+	}, []);
 
 	return (
 		<Router>
