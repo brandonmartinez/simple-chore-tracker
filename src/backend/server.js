@@ -3,7 +3,7 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import apiRoutes from "./api.js";
+import apiRoutes from "./api/index.js";
 // Import and configure the database connection
 import knex from "knex";
 import knexConfig from "../../knexfile.cjs";
