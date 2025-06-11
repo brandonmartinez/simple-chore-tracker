@@ -320,4 +320,70 @@ router.get("/assignments", async (req, res) => {
 	res.json(assignments);
 });
 
+// POST endpoint to submit a completed chore
+router.post("/chores/completions", async (req, res) => {
+	const { chore_id, person_id, time_period_id, points_earned } = req.body;
+
+	if (
+		!chore_id ||
+		!person_id ||
+		!time_period_id ||
+		points_earned === undefined
+	) {
+		logger.error(
+			"Missing required fields in chore completion submission",
+			req.body
+		);
+		return res.status(400).json({ error: "Missing required fields" });
+	}
+
+	try {
+		const [id] = await req.app.locals
+			.db("ChoreCompletions")
+			.insert({
+				chore_id,
+				person_id,
+				time_period_id,
+				points_earned,
+			})
+			.returning("id");
+
+		logger.info(`Chore completion submitted with ID: ${id}`);
+		res.status(201).json({ id });
+	} catch (error) {
+		logger.error("Error submitting chore completion:", error);
+		res.status(500).json({ error: "Failed to submit chore completion." });
+	}
+});
+
+// GET endpoint to retrieve chore completions
+router.get("/chores/completions", async (req, res) => {
+	const { time_period_id, person_id, chore_id } = req.query;
+
+	let query = req.app.locals.db("ChoreCompletions").select("*");
+
+	if (time_period_id) {
+		query = query.where("time_period_id", time_period_id);
+	}
+
+	if (person_id) {
+		query = query.where("person_id", person_id);
+	}
+
+	if (chore_id) {
+		query = query.where("chore_id", chore_id);
+	}
+
+	logger.info(`Executing query: ${query.toString()}`);
+
+	try {
+		const completions = await query;
+		logger.info(`Query results: ${JSON.stringify(completions)}`);
+		res.json(completions);
+	} catch (error) {
+		logger.error("Error retrieving chore completions:", error);
+		res.status(500).json({ error: "Failed to retrieve chore completions." });
+	}
+});
+
 export default router;

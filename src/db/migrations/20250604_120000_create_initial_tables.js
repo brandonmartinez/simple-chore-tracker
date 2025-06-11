@@ -66,6 +66,30 @@ export async function up(knex) {
 		table.timestamps(true, true);
 	});
 
+	await knex.schema.createTable("ChoreCompletions", (table) => {
+		table.increments("id").primary();
+		table
+			.integer("chore_id")
+			.unsigned()
+			.references("id")
+			.inTable("Chores")
+			.onDelete("CASCADE");
+		table
+			.integer("person_id")
+			.unsigned()
+			.references("id")
+			.inTable("People")
+			.onDelete("CASCADE");
+		table
+			.integer("time_period_id")
+			.unsigned()
+			.references("id")
+			.inTable("TimePeriods")
+			.onDelete("CASCADE");
+		table.integer("points_earned").notNullable();
+		table.timestamps(true, true);
+	});
+
 	await knex.schema.createTable("Rewards", (table) => {
 		table.increments("id").primary();
 		table.string("title").notNullable();
@@ -101,6 +125,7 @@ export async function up(knex) {
 export async function down(knex) {
 	await knex.schema.dropTableIfExists("RewardClaims");
 	await knex.schema.dropTableIfExists("Rewards");
+	await knex.schema.dropTableIfExists("ChoreCompletions");
 	await knex.schema.dropTableIfExists("ChoreAssignments");
 	await knex.schema.dropTableIfExists("ChoreAvailableAssignments");
 	await knex.schema.dropTableIfExists("Chores");
