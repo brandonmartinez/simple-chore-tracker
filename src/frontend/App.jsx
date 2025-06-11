@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import logger from "./services/logger";
 import {
 	BrowserRouter as Router,
 	Route,
@@ -12,85 +13,89 @@ import RewardEditor from "./components/RewardEditor";
 import TimePeriodEditor from "./components/TimePeriodEditor";
 import {
 	fetchChores,
-	fetchPeople,
+	fetchChoreAssignments,
+} from "./services/choresApiService";
+import { fetchPeople } from "./services/peopleApiService";
+import { fetchRewards } from "./services/rewardsApiService";
+import {
 	fetchCurrentTimePeriod,
-	fetchAssignments,
-	fetchAvailableWeeks,
-	fetchRewards,
-	assignChore,
-	completeChore,
-	removeAssignment,
-} from "./apiService";
+	fetchAvailableTimePeriods,
+} from "./services/timePeriodsApiService";
 
 export default function App() {
 	const [chores, setChores] = useState([]);
 	const [people, setPeople] = useState([]);
 	const [timePeriod, setTimePeriod] = useState(null);
-	const [availableWeeks, setAvailableWeeks] = useState([]);
+	const [timePeriods, setTimePeriods] = useState([]);
 	const [rewards, setRewards] = useState([]);
 
 	useEffect(() => {
-		console.log("Fetching initial data...");
+		logger.info("Fetching initial data...");
 		fetchChores().then((chores) => {
-			console.log("Fetched chores:", chores);
+			logger.info("Fetched chores:", chores);
 			setChores(chores);
 		});
 		fetchPeople().then((people) => {
-			console.log("Fetched people:", people);
+			logger.info("Fetched people:", people);
 			setPeople(people);
 		});
-		fetchAvailableWeeks().then((weeks) => {
-			console.log("Fetched available weeks:", weeks);
-			setAvailableWeeks(weeks);
+		fetchAvailableTimePeriods().then((weeks) => {
+			logger.info("Fetched available weeks:", weeks);
+			setTimePeriods(weeks);
 		});
 		fetchCurrentTimePeriod().then((period) => {
-			console.log("Fetched current time period:", period);
+			logger.info("Fetched current time period:", period);
 			setTimePeriod(period);
 		});
 		fetchRewards().then((fetchedRewards) => {
-			console.log("Fetched rewards:", fetchedRewards);
+			logger.info("Fetched rewards:", fetchedRewards);
 			setRewards(fetchedRewards);
 		});
 	}, []);
 
 	useEffect(() => {
 		if (!timePeriod) {
-			console.log("No time period selected.");
+			logger.warn("No time period selected.");
 			return;
 		}
-		console.log("Time period selected:", timePeriod);
+		logger.info("Time period selected:", timePeriod);
 
-		fetchAssignments(timePeriod.id).then((assignments) => {
-			console.log("Fetched assignments for time period:", assignments);
-			setChores((prevChores) => {
-				// Clear all assignments first
-				const clearedChores = prevChores.map((chore) => ({
-					...chore,
-					assignedTo: [],
-				}));
-				console.log("Cleared chores state:", clearedChores);
+		fetchChoreAssignments({ timePeriodId: timePeriod.id }).then(
+			(assignments) => {
+				logger.info("Fetched assignments for time period:", assignments);
+				setChores((prevChores) => {
+					// Clear all assignments first
+					const clearedChores = prevChores.map((chore) => ({
+						...chore,
+						assignedTo: [],
+					}));
+					logger.info("Cleared chores state:", clearedChores);
 
-				if (assignments.length === 0) {
-					console.log("No assignments found for the current time period.");
-					return clearedChores;
-				}
+					if (assignments.length === 0) {
+						logger.warn("No assignments found for the current time period.");
+						return clearedChores;
+					}
 
-				// Reassign based on fetched assignments
-				const updatedChores = clearedChores.map((chore) => {
-					const assignment = assignments.find(
-						(a) => a.chore_id === chore.id && a.time_period_id === timePeriod.id
-					);
-					return assignment
-						? {
-								...chore,
-								assignedTo: assignment.person_id ? [assignment.person_id] : [],
-						  }
-						: chore;
+					// Reassign based on fetched assignments
+					const updatedChores = clearedChores.map((chore) => {
+						const assignment = assignments.find(
+							(a) =>
+								a.chore_id === chore.id && a.time_period_id === timePeriod.id
+						);
+						return assignment
+							? {
+									...chore,
+									assignedTo: assignment.person_id
+										? [assignment.person_id]
+										: [],
+							  }
+							: chore;
+					});
+					logger.info("Updated chores state:", updatedChores);
+					return updatedChores;
 				});
-				console.log("Updated chores state:", updatedChores);
-				return updatedChores;
-			});
-		});
+			}
+		);
 	}, [timePeriod]);
 
 	return (
@@ -105,73 +110,30 @@ export default function App() {
 							<ChoreGrid
 								people={people}
 								chores={chores}
-								timePeriod={timePeriod}
-								availableTimePeriods={availableWeeks}
-								setTimePeriod={setTimePeriod}
 								setChores={setChores}
+								timePeriod={timePeriod}
+								setTimePeriod={setTimePeriod}
+								timePeriods={timePeriods}
 							/>
 						}
 					/>
 					<Route
 						path="/chores/editor"
-						element={
-							<ChoreEditor
-								chores={chores}
-								setChores={setChores}
-								onAddChore={(newChore) => {
-									setChores((prevChores) => [...prevChores, newChore]);
-								}}
-								onUpdateChore={(id, updatedChore) => {
-									setChores((prevChores) =>
-										prevChores.map((chore) =>
-											chore.id === id ? updatedChore : chore
-										)
-									);
-								}}
-							/>
-						}
+						element={<ChoreEditor chores={chores} setChores={setChores} />}
 					/>
 					<Route path="/people" element={<div>People Component</div>} />
 					<Route
 						path="/time-periods/editor"
 						element={
 							<TimePeriodEditor
-								timePeriods={availableWeeks}
-								setTimePeriods={setAvailableWeeks}
-								onAddTimePeriod={(newTimePeriod) => {
-									setAvailableWeeks((prevWeeks) => [
-										...prevWeeks,
-										newTimePeriod,
-									]);
-								}}
-								onUpdateTimePeriod={(id, updatedTimePeriod) => {
-									setAvailableWeeks((prevWeeks) =>
-										prevWeeks.map((week) =>
-											week.id === id ? updatedTimePeriod : week
-										)
-									);
-								}}
+								timePeriods={timePeriods}
+								setTimePeriods={setTimePeriods}
 							/>
 						}
 					/>
 					<Route
 						path="/rewards/editor"
-						element={
-							<RewardEditor
-								rewards={rewards}
-								setRewards={setRewards}
-								onAddReward={(newReward) => {
-									setRewards((prevRewards) => [...prevRewards, newReward]);
-								}}
-								onUpdateReward={(id, updatedReward) => {
-									setRewards((prevRewards) =>
-										prevRewards.map((reward) =>
-											reward.id === id ? updatedReward : reward
-										)
-									);
-								}}
-							/>
-						}
+						element={<RewardEditor rewards={rewards} setRewards={setRewards} />}
 					/>
 				</Routes>
 			</div>

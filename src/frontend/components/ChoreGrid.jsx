@@ -1,12 +1,15 @@
 import React from "react";
 import ChoreCell from "./ChoreCell";
-import { assignChore, completeChore, removeAssignment } from "../apiService";
+import {
+	assignChore,
+	removeChoreAssignment,
+} from "../services/choresApiService";
 
 function ChoreGrid({
 	people,
 	chores,
 	timePeriod,
-	availableTimePeriods,
+	timePeriods,
 	setTimePeriod,
 	setChores,
 }) {
@@ -41,7 +44,7 @@ function ChoreGrid({
 			console.error("Invalid timePeriod", timePeriod);
 			return;
 		}
-		assignChore(choreId, personId, timePeriod.id).then(() => {
+		assignChore({ choreId, personId, timePeriodId: timePeriod.id }).then(() => {
 			setChores((prevChores) => {
 				const updatedChores = prevChores.map((chore) =>
 					chore.id === choreId ? { ...chore, assignedTo: [personId] } : chore
@@ -52,18 +55,18 @@ function ChoreGrid({
 	}
 
 	function handleComplete(choreId) {
-		completeChore(choreId, timePeriod.id).then(() => {
-			setChores((prevChores) => {
-				const updatedChores = prevChores.map((chore) =>
-					chore.id === choreId ? { ...chore, completed: true } : chore
-				);
-				return updatedChores;
-			});
-		});
+		// completeChore(choreId, timePeriod.id).then(() => {
+		// 	setChores((prevChores) => {
+		// 		const updatedChores = prevChores.map((chore) =>
+		// 			chore.id === choreId ? { ...chore, completed: true } : chore
+		// 		);
+		// 		return updatedChores;
+		// 	});
+		// });
 	}
 
 	function handleRemoveAssignment(choreId) {
-		removeAssignment(choreId, timePeriod.id).then(() => {
+		removeChoreAssignment(choreId, timePeriod.id).then(() => {
 			setChores((prevChores) => {
 				const updatedChores = prevChores.map((chore) =>
 					chore.id === choreId ? { ...chore, assignedTo: [] } : chore
@@ -75,13 +78,13 @@ function ChoreGrid({
 
 	function handleTimePeriodChange(event) {
 		const selectedId = parseInt(event.target.value, 10);
-		const selectedWeek = availableTimePeriods.find(
-			(week) => week.id === selectedId
-		);
-		if (selectedWeek) {
-			setTimePeriod(selectedWeek);
+		const selected = timePeriods.find((tp) => tp.id === selectedId);
+		if (selected) {
+			setTimePeriod(selected);
 		} else {
-			console.error("Selected week not found in availableWeeks.");
+			console.error(
+				"Selected time period not found in available time periods."
+			);
 		}
 	}
 
@@ -94,18 +97,18 @@ function ChoreGrid({
 		>
 			<div>
 				<select
-					id="week-select"
-					value={timePeriod?.id || availableTimePeriods[0]?.id || ""}
+					id="time-period-select"
+					value={timePeriod?.id || timePeriods[0]?.id || ""}
 					onChange={handleTimePeriodChange}
 					className="bg-slate-200 dark:bg-slate-700 p-2 border border-slate-300 dark:border-slate-600 rounded text-slate-800 dark:text-slate-100"
 				>
-					{availableTimePeriods.map((week) => (
+					{timePeriods.map((tp) => (
 						<option
-							key={week.id}
-							value={week.id}
+							key={tp.id}
+							value={tp.id}
 							className="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100"
 						>
-							{formatDate(week.start_date)}
+							{formatDate(tp.start_date)}
 						</option>
 					))}
 				</select>
