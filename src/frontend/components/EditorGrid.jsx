@@ -112,6 +112,18 @@ function EditorGrid({
 		}
 	};
 
+	// Add a utility function to format the date for the input field
+	const formatDateForInput = (dateString) => {
+		const date = new Date(dateString);
+		return date.toISOString().split("T")[0]; // Extract only the date part
+	};
+
+	// Add a utility function to parse the date back to ISO format
+	const parseDateFromInput = (dateString) => {
+		const date = new Date(dateString);
+		return date.toISOString();
+	};
+
 	return (
 		<table className="border border-collapse border-slate-300 dark:border-slate-600 rounded-lg w-full table-auto">
 			<thead>
@@ -141,12 +153,24 @@ function EditorGrid({
 								<input
 									type={column.type || "text"}
 									value={
-										editedValues[item.id]?.[column.key] ??
-										item[column.key] ??
-										""
+										column.type === "date"
+											? formatDateForInput(
+													editedValues[item.id]?.[column.key] ??
+														item[column.key] ??
+														""
+											  )
+											: editedValues[item.id]?.[column.key] ??
+											  item[column.key] ??
+											  ""
 									}
 									onChange={(e) =>
-										handleEdit(item.id, column.key, e.target.value)
+										handleEdit(
+											item.id,
+											column.key,
+											column.type === "date"
+												? parseDateFromInput(e.target.value)
+												: e.target.value
+										)
 									}
 									className={`p-2 border rounded w-full text-slate-800 dark:text-slate-100 ${
 										editedValues[item.id]?.[column.key] !== undefined

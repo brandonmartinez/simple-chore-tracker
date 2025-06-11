@@ -40,6 +40,9 @@ export async function up(knex) {
 		table.increments("id").primary();
 		table.date("start_date").notNullable();
 		table.date("end_date").notNullable();
+
+		// Common Columns for soft deletion and timestamps
+		table.boolean("deleted").defaultTo(false);
 		table.timestamps(true, true);
 	});
 

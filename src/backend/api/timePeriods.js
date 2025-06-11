@@ -111,4 +111,52 @@ router.get("/time-periods/available", async (req, res) => {
 	res.json(availableTimePeriods.slice(0, limit));
 });
 
+/**
+ * @swagger
+ * /time-periods/:id:
+ *   patch:
+ *     summary: Update a time period
+ *     responses:
+ *       200:
+ *         description: Time period updated successfully
+ */
+router.patch("/time-periods/:id", async (req, res) => {
+	const { id } = req.params;
+	const updates = req.body;
+
+	if (!updates || typeof updates !== "object") {
+		return res.status(400).json({ error: "Invalid updates object" });
+	}
+
+	try {
+		const existingTimePeriod = await req.app.locals
+			.db("TimePeriods")
+			.where({ id })
+			.first();
+		if (!existingTimePeriod) {
+			return res.status(404).json({ error: "Time period not found" });
+		}
+
+		const filteredUpdates = Object.keys(updates).reduce((acc, key) => {
+			if (updates[key] !== existingTimePeriod[key]) {
+				acc[key] = updates[key];
+			}
+			return acc;
+		}, {});
+
+		if (Object.keys(filteredUpdates).length === 0) {
+			return res.status(400).json({ error: "No changes detected" });
+		}
+
+		await req.app.locals
+			.db("TimePeriods")
+			.where({ id })
+			.update(filteredUpdates);
+		res.status(200).json({ success: true });
+	} catch (error) {
+		console.error("Error updating time period:", error);
+		res.status(500).json({ error: "Failed to update time period" });
+	}
+});
+
 export default router;
