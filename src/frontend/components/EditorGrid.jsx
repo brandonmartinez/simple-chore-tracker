@@ -74,9 +74,19 @@ function EditorGrid({
 	};
 
 	const handleSave = async (id) => {
+		const columnKeys = columns.map((column) => column.key);
 		const updatedItem = {
-			...items.find((item) => item.id === id),
-			...editedValues[id],
+			id,
+			...Object.fromEntries(
+				Object.entries(items.find((item) => item.id === id) || {}).filter(
+					([key]) => columnKeys.includes(key)
+				)
+			),
+			...Object.fromEntries(
+				Object.entries(editedValues[id] || {}).filter(([key]) =>
+					columnKeys.includes(key)
+				)
+			),
 		};
 		try {
 			await onUpdate(id, updatedItem);
