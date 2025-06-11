@@ -2,6 +2,15 @@ import express from "express";
 const router = express.Router();
 import logger from "../logger.js";
 
+/**
+ * @swagger
+ * /chores:
+ *   get:
+ *     summary: Retrieve a list of chores
+ *     responses:
+ *       200:
+ *         description: A list of chores
+ */
 router.get("/chores", async (req, res) => {
 	const { includeDeleted } = req.query;
 	let query = req.app.locals.db("Chores").select("*");
@@ -16,6 +25,15 @@ router.get("/chores", async (req, res) => {
 	res.json(chores);
 });
 
+/**
+ * @swagger
+ * /chores:
+ *   post:
+ *     summary: Add a new chore
+ *     responses:
+ *       201:
+ *         description: Chore added successfully
+ */
 router.post("/chores", async (req, res) => {
 	try {
 		const [id] = await req.app.locals
@@ -30,7 +48,15 @@ router.post("/chores", async (req, res) => {
 	}
 });
 
-// Update endpoint to handle general chore updates
+/**
+ * @swagger
+ * /chores/:id:
+ *   patch:
+ *     summary: Update a chore
+ *     responses:
+ *       200:
+ *         description: Chore updated successfully
+ */
 router.patch("/chores/:id", async (req, res) => {
 	const { id } = req.params;
 	const updates = req.body;
@@ -67,7 +93,15 @@ router.patch("/chores/:id", async (req, res) => {
 	}
 });
 
-// Update endpoints to be under '/chores/assignments/available'
+/**
+ * @swagger
+ * /chores/assignments/available:
+ *   get:
+ *     summary: Retrieve available chore assignments
+ *     responses:
+ *       200:
+ *         description: A list of available chore assignments
+ */
 router.get("/chores/assignments/available", async (req, res) => {
 	const assignments = await req.app.locals
 		.db("ChoreAvailableAssignments")
@@ -75,6 +109,15 @@ router.get("/chores/assignments/available", async (req, res) => {
 	res.json(assignments);
 });
 
+/**
+ * @swagger
+ * /chores/assignments/available:
+ *   post:
+ *     summary: Add a new available chore assignment
+ *     responses:
+ *       201:
+ *         description: Assignment added successfully
+ */
 router.post("/chores/assignments/available", async (req, res) => {
 	const [id] = await req.app.locals
 		.db("ChoreAvailableAssignments")
@@ -82,7 +125,15 @@ router.post("/chores/assignments/available", async (req, res) => {
 	res.json({ id });
 });
 
-// ChoreAssignments endpoints
+/**
+ * @swagger
+ * /chores/assignments:
+ *   get:
+ *     summary: Retrieve chore assignments
+ *     responses:
+ *       200:
+ *         description: A list of chore assignments
+ */
 router.get("/chores/assignments", async (req, res) => {
 	const { timePeriodId } = req.query;
 	let query = req.app.locals.db("ChoreAssignments").select("*");
@@ -98,6 +149,15 @@ router.get("/chores/assignments", async (req, res) => {
 	res.json(assignments);
 });
 
+/**
+ * @swagger
+ * /chores/assignments:
+ *   post:
+ *     summary: Assign a chore
+ *     responses:
+ *       201:
+ *         description: Chore assigned successfully
+ */
 router.post("/chores/assignments", async (req, res) => {
 	const { chore_id, person_id, time_period_id } = req.body;
 	try {
@@ -126,7 +186,15 @@ router.post("/chores/assignments", async (req, res) => {
 	}
 });
 
-// Add endpoint to remove assignments
+/**
+ * @swagger
+ * /chores/assignments:
+ *   delete:
+ *     summary: Remove a chore assignment
+ *     responses:
+ *       200:
+ *         description: Assignment removed successfully
+ */
 router.delete("/chores/assignments", async (req, res) => {
 	const { chore_id, time_period_id } = req.body;
 	console.log("DELETE request received:", { chore_id, time_period_id });
@@ -143,7 +211,15 @@ router.delete("/chores/assignments", async (req, res) => {
 	}
 });
 
-// POST endpoint to submit a completed chore
+/**
+ * @swagger
+ * /chores/completions:
+ *   post:
+ *     summary: Submit a completed chore
+ *     responses:
+ *       201:
+ *         description: Chore completion submitted successfully
+ */
 router.post("/chores/completions", async (req, res) => {
 	const { chore_id, person_id, time_period_id, points_earned } = req.body;
 
@@ -179,7 +255,15 @@ router.post("/chores/completions", async (req, res) => {
 	}
 });
 
-// GET endpoint to retrieve chore completions
+/**
+ * @swagger
+ * /chores/completions:
+ *   get:
+ *     summary: Retrieve chore completions
+ *     responses:
+ *       200:
+ *         description: A list of chore completions
+ */
 router.get("/chores/completions", async (req, res) => {
 	const { time_period_id, person_id, chore_id } = req.query;
 

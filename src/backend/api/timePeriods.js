@@ -2,6 +2,15 @@ import express from "express";
 const router = express.Router();
 import logger from "../logger.js";
 
+/**
+ * @swagger
+ * /time-periods:
+ *   get:
+ *     summary: Retrieve a list of time periods
+ *     responses:
+ *       200:
+ *         description: A list of time periods
+ */
 router.get("/time-periods", async (req, res) => {
 	const query = req.app.locals.db("TimePeriods").select("*");
 	console.log("Executing query:", query.toString());
@@ -10,6 +19,15 @@ router.get("/time-periods", async (req, res) => {
 	res.json(periods);
 });
 
+/**
+ * @swagger
+ * /time-periods:
+ *   post:
+ *     summary: Add a new time period
+ *     responses:
+ *       201:
+ *         description: Time period added successfully
+ */
 router.post("/time-periods", async (req, res) => {
 	const query = req.app.locals.db("TimePeriods").insert(req.body);
 	console.log("Executing query:", query.toString());
@@ -18,7 +36,15 @@ router.post("/time-periods", async (req, res) => {
 	res.json({ id });
 });
 
-// Update endpoint to have a more REST-like structure
+/**
+ * @swagger
+ * /time-periods/current:
+ *   get:
+ *     summary: Retrieve the current time period
+ *     responses:
+ *       200:
+ *         description: Current time period retrieved successfully
+ */
 router.get("/time-periods/current", async (req, res) => {
 	const currentDate = new Date();
 
@@ -58,7 +84,15 @@ router.get("/time-periods/current", async (req, res) => {
 	res.json(timePeriod);
 });
 
-// Endpoint to dynamically generate and return the last 10 weeks
+/**
+ * @swagger
+ * /time-periods/available:
+ *   get:
+ *     summary: Retrieve the last 10 available time periods
+ *     responses:
+ *       200:
+ *         description: Available time periods retrieved successfully
+ */
 router.get("/time-periods/available", async (req, res) => {
 	const pastCount = parseInt(req.query.pastCount, 10) || 10;
 	const query = req.app.locals

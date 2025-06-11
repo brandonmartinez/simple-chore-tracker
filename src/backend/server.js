@@ -9,6 +9,8 @@ import knex from "knex";
 import knexConfig from "../../knexfile.cjs";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import dotenv from "dotenv";
+import swaggerUi from "swagger-ui-express";
+import swaggerJsDoc from "swagger-jsdoc";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -32,6 +34,28 @@ app.use("/api", apiRoutes);
 const isDevelopment = process.env.NODE_ENV === "development";
 
 if (isDevelopment) {
+	// Swagger should only be enabled in development mode
+	const swaggerOptions = {
+		swaggerDefinition: {
+			openapi: "3.0.0",
+			info: {
+				title: "Simple Chore Tracker API",
+				version: "1.0.0",
+				description:
+					"API documentation for the Simple Chore Tracker application",
+			},
+			servers: [
+				{
+					url: `http://localhost:${PORT}/api`,
+					description: "Development server",
+				},
+			],
+		},
+		apis: ["./src/backend/api/**/*.js"],
+	};
+
+	const swaggerDocs = swaggerJsDoc(swaggerOptions);
+	app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 	// Proxy requests to Vite during development, including WebSocket connections
 	app.use(
 		createProxyMiddleware({

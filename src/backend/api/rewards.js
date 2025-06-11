@@ -2,6 +2,15 @@ import express from "express";
 const router = express.Router();
 import logger from "../logger.js";
 
+/**
+ * @swagger
+ * /rewards:
+ *   get:
+ *     summary: Retrieve a list of rewards
+ *     responses:
+ *       200:
+ *         description: A list of rewards
+ */
 router.get("/rewards", async (req, res) => {
 	const { includeDeleted } = req.query;
 	let query = req.app.locals.db("Rewards").select("*");
@@ -16,6 +25,15 @@ router.get("/rewards", async (req, res) => {
 	res.json(rewards);
 });
 
+/**
+ * @swagger
+ * /rewards:
+ *   post:
+ *     summary: Add a new reward
+ *     responses:
+ *       201:
+ *         description: Reward added successfully
+ */
 router.post("/rewards", async (req, res) => {
 	try {
 		const query = req.app.locals.db("Rewards").insert(req.body);
@@ -29,7 +47,15 @@ router.post("/rewards", async (req, res) => {
 	}
 });
 
-// PATCH endpoint for rewards to allow editing and soft deleting
+/**
+ * @swagger
+ * /rewards/:id:
+ *   patch:
+ *     summary: Update a reward
+ *     responses:
+ *       200:
+ *         description: Reward updated successfully
+ */
 router.patch("/rewards/:id", async (req, res) => {
 	const { id } = req.params;
 	const updates = req.body;
@@ -66,12 +92,29 @@ router.patch("/rewards/:id", async (req, res) => {
 	}
 });
 
-// RewardClaims endpoints
+/**
+ * @swagger
+ * /rewards/claims:
+ *   get:
+ *     summary: Retrieve reward claims
+ *     responses:
+ *       200:
+ *         description: A list of reward claims
+ */
 router.get("/rewards/claims", async (req, res) => {
 	const claims = await req.app.locals.db("RewardClaims").select("*");
 	res.json(claims);
 });
 
+/**
+ * @swagger
+ * /rewards/claims:
+ *   post:
+ *     summary: Add a new reward claim
+ *     responses:
+ *       201:
+ *         description: Reward claim added successfully
+ */
 router.post("/rewards/claims", async (req, res) => {
 	const [id] = await req.app.locals.db("RewardClaims").insert(req.body);
 	res.json({ id });
