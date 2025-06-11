@@ -1,57 +1,20 @@
+import { fetchItems, addItems, updateItem, removeItem } from "./apiHelpers.js";
 import logger from "./logger.js";
 
 export async function fetchChores() {
-	logger.info("Fetching chores from API");
-	const response = await fetch("/api/chores");
-	if (!response.ok) {
-		logger.error("Failed to fetch chores", { status: response.status });
-		throw new Error("Failed to fetch chores");
-	}
-	return response.json();
+	return await fetchItems("chores");
 }
 
 export async function addChore(chore) {
-	logger.info("Adding new chore to API", { chore });
-	const response = await fetch("/api/chores", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify(chore),
-	});
-	if (!response.ok) {
-		const errorText = await response.text();
-		logger.error("Failed to add chore", {
-			status: response.status,
-			error: errorText,
-		});
-		throw new Error("Failed to add chore");
-	}
-	return response.json();
+	return await addItems("chores", "chore", chore);
 }
 
 export async function updateChore(choreId, updates) {
-	logger.info("Updating chore", { choreId, updates });
-	const response = await fetch(`/api/chores/${choreId}`, {
-		method: "PATCH",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify(updates),
-	});
-	if (!response.ok) {
-		logger.error("Failed to update chore", { status: response.status });
-		throw new Error("Failed to update chore");
-	}
-	return response.json();
+	return await updateItem("chores", "chore", choreId, updates);
 }
 
 export async function removeChore(choreId) {
-	logger.info("Removing chore", { choreId });
-	const response = await fetch(`/api/chores/${choreId}`, {
-		method: "DELETE",
-	});
-	if (!response.ok) {
-		logger.error("Failed to remove chore", { status: response.status });
-		throw new Error("Failed to remove chore");
-	}
-	return response.json();
+	return await removeItem("chores", "chore", choreId);
 }
 
 export async function fetchChoreAssignments(params = {}) {
