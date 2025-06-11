@@ -88,21 +88,27 @@ router.get("/time-periods/current", async (req, res) => {
  * @swagger
  * /time-periods/available:
  *   get:
- *     summary: Retrieve the last 10 available time periods
+ *     summary: Retrieve the latest available time periods around the current datetime
  *     responses:
  *       200:
  *         description: Available time periods retrieved successfully
  */
 router.get("/time-periods/available", async (req, res) => {
-	const pastCount = parseInt(req.query.pastCount, 10) || 10;
+	const limit = parseInt(req.query.limit, 10) || 10;
+	const todayPlus7 = new Date();
+	todayPlus7.setDate(todayPlus7.getDate() + 7);
+
 	const query = req.app.locals
 		.db("TimePeriods")
+		.where("start_date", "<=", todayPlus7)
 		.orderBy("start_date", "desc")
-		.limit(pastCount);
+		.limit(limit + 1);
+
 	logger.info(`Executing query: ${query.toString()}`);
-	const weeks = await query;
-	logger.info(`Query results: ${JSON.stringify(weeks)}`);
-	res.json(weeks);
+	const availableTimePeriods = await query;
+	logger.info(`Query results: ${JSON.stringify(availableTimePeriods)}`);
+
+	res.json(availableTimePeriods.slice(0, limit));
 });
 
 export default router;
