@@ -11,12 +11,10 @@ function TimePeriodEditor({ timePeriods, setTimePeriods }) {
 		{
 			key: "start_date",
 			label: "Start Date",
-			onSort: () => handleSort("start_date"),
 		},
 		{
 			key: "end_date",
 			label: "End Date",
-			onSort: () => handleSort("end_date"),
 		},
 	];
 

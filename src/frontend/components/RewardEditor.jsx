@@ -8,11 +8,10 @@ import EditorGrid from "./EditorGrid";
 
 function RewardEditor({ rewards, setRewards }) {
 	const columns = [
-		{ key: "title", label: "Title", onSort: () => handleSort("title") },
+		{ key: "title", label: "Title" },
 		{
 			key: "points_cost",
 			label: "Points Cost",
-			onSort: () => handleSort("points_cost"),
 			type: "number",
 		},
 	];
