@@ -12,11 +12,13 @@ function TimePeriodEditor({ timePeriods, setTimePeriods }) {
 			key: "start_date",
 			label: "Start Date",
 			type: "date",
+			required: true,
 		},
 		{
 			key: "end_date",
 			label: "End Date",
 			type: "date",
+			required: true,
 		},
 	];
 

@@ -44,7 +44,11 @@ function ChoreGrid({
 			console.error("Invalid timePeriod", timePeriod);
 			return;
 		}
-		assignChore({ choreId, personId, timePeriodId: timePeriod.id }).then(() => {
+		assignChore({
+			chore_id: choreId,
+			person_id: personId,
+			time_period_id: timePeriod.id,
+		}).then(() => {
 			setChores((prevChores) => {
 				const updatedChores = prevChores.map((chore) =>
 					chore.id === choreId ? { ...chore, assignedTo: [personId] } : chore

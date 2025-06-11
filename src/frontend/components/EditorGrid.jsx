@@ -118,8 +118,12 @@ function EditorGrid({
 	};
 
 	const handleAdd = async () => {
-		if (Object.values(newItem).some((value) => value === "")) {
-			alert("Please fill in all fields before adding a new item.");
+		// Check required fields based on column config
+		const missingRequired = columns.some(
+			(column) => column.required && !newItem[column.key]
+		);
+		if (missingRequired) {
+			alert("Please fill in all required fields before adding a new item.");
 			return;
 		}
 		try {
@@ -192,7 +196,14 @@ function EditorGrid({
 										)
 									}
 									className={`p-2 border rounded w-full text-slate-800 dark:text-slate-100 ${
-										editedValues[item.id]?.[column.key] !== undefined
+										column.required &&
+										!(
+											editedValues[item.id]?.[column.key] ??
+											item[column.key] ??
+											""
+										)
+											? "border-red-500"
+											: editedValues[item.id]?.[column.key] !== undefined
 											? "border-green-500"
 											: "border-slate-300 dark:border-slate-600"
 									}`}
@@ -205,11 +216,29 @@ function EditorGrid({
 								onClick={() => handleSave(item.id)}
 								disabled={
 									!editedValues[item.id] ||
-									Object.keys(editedValues[item.id]).length === 0
+									Object.keys(editedValues[item.id]).length === 0 ||
+									columns.some(
+										(column) =>
+											column.required &&
+											!(
+												editedValues[item.id]?.[column.key] ??
+												item[column.key] ??
+												""
+											)
+									)
 								}
 								className={`bg-sky-500 hover:bg-sky-600 px-4 py-2 rounded text-white ${
 									!editedValues[item.id] ||
-									Object.keys(editedValues[item.id]).length === 0
+									Object.keys(editedValues[item.id]).length === 0 ||
+									columns.some(
+										(column) =>
+											column.required &&
+											!(
+												editedValues[item.id]?.[column.key] ??
+												item[column.key] ??
+												""
+											)
+									)
 										? "opacity-50 cursor-not-allowed"
 										: ""
 								}`}
@@ -241,9 +270,24 @@ function EditorGrid({
 					<td className="px-4 py-2">
 						<button
 							onClick={handleAdd}
-							className="bg-sky-500 hover:bg-sky-600 px-4 py-2 rounded text-white"
+							disabled={columns.some(
+								(column) => column.required && !newItem[column.key]
+							)}
+							className={`bg-sky-500 hover:bg-sky-600 px-4 py-2 rounded text-white ${
+								columns.some(
+									(column) => column.required && !newItem[column.key]
+								)
+									? "opacity-50 cursor-not-allowed"
+									: ""
+							}`}
 						>
 							Add
+						</button>
+						<button
+							onClick={() => setNewItem(createNewItem)}
+							className="bg-gray-500 hover:bg-gray-600 ml-2 px-4 py-2 rounded text-white"
+						>
+							Reset
 						</button>
 					</td>
 				</tr>

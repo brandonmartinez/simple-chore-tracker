@@ -12,11 +12,16 @@ function ChoreEditor({ chores, setChores }) {
 			key: "category",
 			label: "Category",
 		},
-		{ key: "title", label: "Title" },
+		{
+			key: "title",
+			label: "Title",
+			required: true,
+		},
 		{
 			key: "points",
 			label: "Points",
 			type: "number",
+			required: true,
 		},
 	];
 
