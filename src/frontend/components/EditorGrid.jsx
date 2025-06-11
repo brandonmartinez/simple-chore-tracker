@@ -74,6 +74,12 @@ function EditorGrid({
 	};
 
 	const handleSave = async (id) => {
+		// Add animation to the save button when clicked
+		const saveButton = document.getElementById(`save-button-${id}`);
+		if (saveButton) {
+			saveButton.classList.add("animate-pulse");
+		}
+
 		const columnKeys = columns.map((column) => column.key);
 		const updatedItem = {
 			id,
@@ -99,6 +105,10 @@ function EditorGrid({
 			);
 		} catch (error) {
 			console.error(`Failed to update ${config.singular}:`, error);
+		} finally {
+			if (saveButton) {
+				saveButton.classList.remove("animate-pulse");
+			}
 		}
 	};
 
@@ -138,14 +148,28 @@ function EditorGrid({
 									onChange={(e) =>
 										handleEdit(item.id, column.key, e.target.value)
 									}
-									className="p-2 border border-slate-300 dark:border-slate-600 rounded w-full text-slate-800 dark:text-slate-100"
+									className={`p-2 border rounded w-full text-slate-800 dark:text-slate-100 ${
+										editedValues[item.id]?.[column.key] !== undefined
+											? "border-green-500"
+											: "border-slate-300 dark:border-slate-600"
+									}`}
 								/>
 							</td>
 						))}
 						<td className="px-4 py-2">
 							<button
+								id={`save-button-${item.id}`}
 								onClick={() => handleSave(item.id)}
-								className="bg-sky-500 hover:bg-sky-600 px-4 py-2 rounded text-white"
+								disabled={
+									!editedValues[item.id] ||
+									Object.keys(editedValues[item.id]).length === 0
+								}
+								className={`bg-sky-500 hover:bg-sky-600 px-4 py-2 rounded text-white ${
+									!editedValues[item.id] ||
+									Object.keys(editedValues[item.id]).length === 0
+										? "opacity-50 cursor-not-allowed"
+										: ""
+								}`}
 							>
 								Save
 							</button>
