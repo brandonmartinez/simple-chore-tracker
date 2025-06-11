@@ -93,17 +93,6 @@ export default function App() {
 		});
 	}, [timePeriod]);
 
-	const groupedChores = chores.reduce((acc, chore) => {
-		const category = chore.category || "Uncategorized";
-		if (!acc[category]) {
-			acc[category] = [];
-		}
-		acc[category].push(chore);
-		return acc;
-	}, {});
-
-	const sortedCategories = Object.keys(groupedChores).sort();
-
 	return (
 		<Router>
 			<Navbar />
@@ -115,8 +104,7 @@ export default function App() {
 						element={
 							<ChoreGrid
 								people={people}
-								groupedChores={groupedChores}
-								sortedCategories={sortedCategories}
+								chores={chores}
 								timePeriod={timePeriod}
 								availableTimePeriods={availableWeeks}
 								setTimePeriod={setTimePeriod}

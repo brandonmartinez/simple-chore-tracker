@@ -4,13 +4,23 @@ import { assignChore, completeChore, removeAssignment } from "../apiService";
 
 function ChoreGrid({
 	people,
-	groupedChores,
-	sortedCategories,
+	chores,
 	timePeriod,
 	availableTimePeriods,
 	setTimePeriod,
 	setChores,
 }) {
+	const groupedChores = chores.reduce((acc, chore) => {
+		const category = chore.category || "Uncategorized";
+		if (!acc[category]) {
+			acc[category] = [];
+		}
+		acc[category].push(chore);
+		return acc;
+	}, {});
+
+	const sortedCategories = Object.keys(groupedChores).sort();
+
 	function formatDate(dateStr) {
 		// Parse as UTC if dateStr is in 'YYYY-MM-DD' format to avoid timezone issues
 		let date;
