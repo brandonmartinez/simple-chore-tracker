@@ -3,12 +3,18 @@ import React from "react";
 function ChoreCell({
 	chore,
 	person,
+	completions,
+	isAssigned,
 	onAssign,
 	onComplete,
 	onRemoveAssignment,
 }) {
-	const isAssigned = chore.assignedTo && chore.assignedTo.includes(person.id);
-	const isCompleted = chore.completed;
+	const totalCompletionPoints = completions
+		? Object.values(completions).reduce(
+				(sum, completion) => sum + (completion.points_earned || 0),
+				0
+		  )
+		: 0;
 
 	return (
 		<div
@@ -16,9 +22,9 @@ function ChoreCell({
 				isAssigned ? "border-2 border-green-500" : ""
 			}`}
 		>
-			{!isCompleted && (!chore.assignedTo || !chore.assignedTo.length) && (
+			{!isAssigned && (
 				<button
-					className="bg-green-500 text-white px-2 py-1 rounded mr-2"
+					className="bg-green-500 mr-2 px-2 py-1 rounded text-white"
 					onClick={() => onAssign(chore.id, person.id)}
 					title="Assign Chore"
 				>
@@ -27,23 +33,28 @@ function ChoreCell({
 			)}
 			{isAssigned && (
 				<button
-					className="bg-red-500 text-white px-2 py-1 rounded mr-2"
+					className="bg-red-500 mr-2 px-2 py-1 rounded text-white"
 					onClick={() => onRemoveAssignment(chore.id)}
 					title="Remove Assignment"
 				>
 					❌
 				</button>
 			)}
-			{!isCompleted && (
-				<button
-					className="bg-blue-500 text-white px-2 py-1 rounded"
-					onClick={() => onComplete(chore.id)}
-					title="Mark as Completed"
-				>
-					✅
-				</button>
-			)}
-			{isCompleted && <span>✅ +{chore.points}</span>}
+
+			<button
+				className="bg-blue-500 px-2 py-1 rounded text-white"
+				onClick={() => onComplete(chore.id, person.id)}
+				title="Mark as Completed"
+			>
+				✅
+			</button>
+
+			<div className="flex justify-center items-center mt-2 font-semibold text-sm">
+				<span role="img" aria-label="plus">
+					➕
+				</span>
+				<span className="ml-1">{totalCompletionPoints}</span>
+			</div>
 		</div>
 	);
 }

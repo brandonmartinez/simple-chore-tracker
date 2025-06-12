@@ -1,18 +1,52 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import ChoreCell from "./ChoreCell";
 import {
 	assignChore,
 	removeChoreAssignment,
+	addChoreCompletion,
+	fetchChoreAssignments,
+	fetchChoreCompletions,
 } from "../services/choresApiService";
 
-function ChoreGrid({
-	people,
-	chores,
-	timePeriod,
-	timePeriods,
-	setTimePeriod,
-	setChores,
-}) {
+function ChoreGrid({ people, chores, timePeriod, timePeriods, setTimePeriod }) {
+	const [choreCompletions, setChoreCompletions] = useState({});
+	const [choreAssignments, setChoreAssignments] = useState({});
+
+	useEffect(() => {
+		if (chores) {
+			fetchChoreAssignments().then((assignments) => {
+				const assignmentsMap = {};
+				assignments.forEach((assignment) => {
+					if (!assignmentsMap[assignment.chore_id]) {
+						assignmentsMap[assignment.chore_id] = [];
+					}
+					assignmentsMap[assignment.chore_id].push(assignment.person_id);
+				});
+				setChoreAssignments(assignmentsMap);
+			});
+
+			const choreCompletionOptions = {};
+			if (!!timePeriod) {
+				choreCompletionOptions.time_period_id = timePeriod.id;
+			}
+			fetchChoreCompletions(choreCompletionOptions).then((completions) => {
+				const completionsMap = {};
+				completions.forEach((completion) => {
+					if (!completionsMap[completion.chore_id]) {
+						completionsMap[completion.chore_id] = {};
+					}
+					if (!completionsMap[completion.chore_id][completion.person_id]) {
+						completionsMap[completion.chore_id][completion.person_id] = [];
+					}
+					completionsMap[completion.chore_id][completion.person_id].push(
+						completion
+					);
+				});
+				setChoreCompletions(completionsMap);
+			});
+		}
+	}, [chores]);
+
 	const groupedChores = chores.reduce((acc, chore) => {
 		const category = chore.category || "Uncategorized";
 		if (!acc[category]) {
@@ -49,34 +83,39 @@ function ChoreGrid({
 			person_id: personId,
 			time_period_id: timePeriod.id,
 		}).then(() => {
-			setChores((prevChores) => {
-				const updatedChores = prevChores.map((chore) =>
-					chore.id === choreId ? { ...chore, assignedTo: [personId] } : chore
-				);
-				return updatedChores;
+			setChoreAssignments((prev) => ({
+				...prev,
+				[choreId]: [personId],
+			}));
+		});
+	}
+
+	function handleCompletion(choreId, personId) {
+		addChoreCompletion({
+			chore_id: choreId,
+			person_id: personId,
+			time_period_id: timePeriod.id,
+		}).then((choreCompletion) => {
+			setChoreCompletions((prev) => {
+				const prevChore = prev[choreId] || {};
+				const prevPersonCompletions = prevChore[personId] || [];
+				return {
+					...prev,
+					[choreId]: {
+						...prevChore,
+						[personId]: [...prevPersonCompletions, choreCompletion],
+					},
+				};
 			});
 		});
 	}
 
-	function handleComplete(choreId) {
-		// completeChore(choreId, timePeriod.id).then(() => {
-		// 	setChores((prevChores) => {
-		// 		const updatedChores = prevChores.map((chore) =>
-		// 			chore.id === choreId ? { ...chore, completed: true } : chore
-		// 		);
-		// 		return updatedChores;
-		// 	});
-		// });
-	}
-
 	function handleRemoveAssignment(choreId) {
 		removeChoreAssignment(choreId, timePeriod.id).then(() => {
-			setChores((prevChores) => {
-				const updatedChores = prevChores.map((chore) =>
-					chore.id === choreId ? { ...chore, assignedTo: [] } : chore
-				);
-				return updatedChores;
-			});
+			setChoreAssignments((prev) => ({
+				...prev,
+				[choreId]: [],
+			}));
 		});
 	}
 
@@ -143,8 +182,14 @@ function ChoreGrid({
 										key={person.id}
 										chore={chore}
 										person={person}
+										completions={choreCompletions[chore.id]?.[person.id] || []}
+										isAssigned={
+											choreAssignments[chore.id]?.includes(person.id) || false
+										}
+										choreCompletion={choreCompletions[chore.id]}
+										choreAssignment={choreAssignments[chore.id]}
 										onAssign={handleAssign}
-										onComplete={handleComplete}
+										onComplete={handleCompletion}
 										onRemoveAssignment={handleRemoveAssignment}
 									/>
 								))}

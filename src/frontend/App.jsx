@@ -124,7 +124,6 @@ export default function App() {
 							<ChoreGrid
 								people={people}
 								chores={chores}
-								setChores={setChores}
 								timePeriod={timePeriod}
 								setTimePeriod={setTimePeriod}
 								timePeriods={timePeriods}

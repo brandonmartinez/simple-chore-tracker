@@ -59,3 +59,27 @@ export async function removeChoreAssignment(choreId, timePeriodId) {
 	}
 	return response.json();
 }
+
+export async function fetchChoreCompletions({ time_period_id }) {
+	const options = { params: {} };
+	if (time_period_id !== undefined && time_period_id !== null) {
+		options.params.time_period_id = time_period_id;
+	}
+	return await fetchItems("chores/completions", options);
+}
+
+export async function addChoreCompletion(choreCompletion) {
+	return await addItems(
+		"chores/completions",
+		"chores/completion",
+		choreCompletion
+	);
+}
+
+export async function removeChoreCompletion(choreCompletionId) {
+	return await removeItem(
+		"chores/completions",
+		"chores/completion",
+		choreCompletionId
+	);
+}

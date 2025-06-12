@@ -221,14 +221,9 @@ router.delete("/chores/assignments", async (req, res) => {
  *         description: Chore completion submitted successfully
  */
 router.post("/chores/completions", async (req, res) => {
-	const { chore_id, person_id, time_period_id, points_earned } = req.body;
+	const { chore_id, person_id, time_period_id } = req.body;
 
-	if (
-		!chore_id ||
-		!person_id ||
-		!time_period_id ||
-		points_earned === undefined
-	) {
+	if (!chore_id || !person_id || !time_period_id) {
 		logger.error(
 			"Missing required fields in chore completion submission",
 			req.body
@@ -237,18 +232,32 @@ router.post("/chores/completions", async (req, res) => {
 	}
 
 	try {
-		const [id] = await req.app.locals
-			.db("ChoreCompletions")
-			.insert({
-				chore_id,
-				person_id,
-				time_period_id,
-				points_earned,
-			})
-			.returning("id");
+		const chore = await req.app.locals
+			.db("Chores")
+			.where({ id: chore_id })
+			.first();
 
-		logger.info(`Chore completion submitted with ID: ${id}`);
-		res.status(201).json({ id });
+		if (!chore || !chore.points) {
+			return res
+				.status(400)
+				.json({ error: "Chore not found or points not available." });
+		}
+
+		const choreCompletion = {
+			chore_id,
+			person_id,
+			time_period_id,
+			points_earned: chore.points,
+		};
+
+		const [newChore] = await req.app.locals
+			.db("ChoreCompletions")
+			.insert(choreCompletion)
+			.returning("id");
+		choreCompletion.id = newChore.id;
+
+		logger.info(`Chore completion submitted with ID: ${choreCompletion.id}`);
+		res.status(201).json(choreCompletion);
 	} catch (error) {
 		logger.error("Error submitting chore completion:", error);
 		res.status(500).json({ error: "Failed to submit chore completion." });

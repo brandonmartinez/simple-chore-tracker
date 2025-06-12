@@ -1,8 +1,9 @@
 import logger from "./logger.js";
 
-export async function fetchItems(resourceName) {
+export async function fetchItems(resourceName, { params, ...options } = {}) {
 	logger.info(`Fetching ${resourceName} from API`);
-	const response = await fetch(`/api/${resourceName}`);
+	const query = new URLSearchParams(params).toString();
+	const response = await fetch(`/api/${resourceName}?${query}`);
 	if (!response.ok) {
 		logger.error(`Failed to fetch ${resourceName}`, {
 			status: response.status,
