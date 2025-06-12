@@ -1,4 +1,4 @@
-import { fetchItems, addItems, updateItem, removeItem } from "./apiHelpers.js";
+import { fetchItems, addItem, updateItem, removeItem } from "./apiHelpers.js";
 import logger from "./logger.js";
 
 export async function fetchPeople() {
@@ -6,7 +6,7 @@ export async function fetchPeople() {
 }
 
 export async function addPerson(person) {
-	return await addItems("people", "person", person);
+	return await addItem("people", "person", person);
 }
 
 export async function updatePerson(personId, updates) {

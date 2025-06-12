@@ -13,7 +13,7 @@ export async function fetchItems(resourceName, { params, ...options } = {}) {
 	return response.json();
 }
 
-export async function addItems(resourceName, itemName, item) {
+export async function addItem(resourceName, itemName, item) {
 	logger.info(`Adding new ${itemName} to API`, { item });
 	const response = await fetch(`/api/${resourceName}`, {
 		method: "POST",

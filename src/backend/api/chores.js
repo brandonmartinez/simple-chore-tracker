@@ -36,12 +36,12 @@ router.get("/chores", async (req, res) => {
  */
 router.post("/chores", async (req, res) => {
 	try {
-		const [id] = await req.app.locals
+		const [chore] = await req.app.locals
 			.db("Chores")
 			.insert(req.body)
-			.returning("id");
-		logger.info(`Inserted chore with ID: ${id}`);
-		res.json({ id });
+			.returning("*");
+		logger.info(`Inserted chore: ${JSON.stringify(chore)}`);
+		res.status(201).json(chore);
 	} catch (error) {
 		logger.error("Error inserting chore:", error);
 		res.status(500).json({ error: "Failed to add chore." });

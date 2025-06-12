@@ -1,4 +1,4 @@
-import { fetchItems, addItems, updateItem, removeItem } from "./apiHelpers.js";
+import { fetchItems, addItem, updateItem, removeItem } from "./apiHelpers.js";
 import logger from "./logger.js";
 
 export async function fetchChores() {
@@ -6,7 +6,7 @@ export async function fetchChores() {
 }
 
 export async function addChore(chore) {
-	return await addItems("chores", "chore", chore);
+	return await addItem("chores", "chore", chore);
 }
 
 export async function updateChore(choreId, updates) {
@@ -69,7 +69,7 @@ export async function fetchChoreCompletions({ time_period_id }) {
 }
 
 export async function addChoreCompletion(choreCompletion) {
-	return await addItems(
+	return await addItem(
 		"chores/completions",
 		"chores/completion",
 		choreCompletion

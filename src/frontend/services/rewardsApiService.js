@@ -1,4 +1,4 @@
-import { fetchItems, addItems, updateItem, removeItem } from "./apiHelpers.js";
+import { fetchItems, addItem, updateItem, removeItem } from "./apiHelpers.js";
 import logger from "./logger.js";
 
 export async function fetchRewards() {
@@ -6,7 +6,7 @@ export async function fetchRewards() {
 }
 
 export async function addReward(reward) {
-	return await addItems("rewards", "reward", reward);
+	return await addItem("rewards", "reward", reward);
 }
 
 export async function updateReward(rewardId, updates) {

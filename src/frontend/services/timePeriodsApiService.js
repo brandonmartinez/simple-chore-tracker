@@ -1,4 +1,4 @@
-import { fetchItems, addItems, updateItem, removeItem } from "./apiHelpers.js";
+import { fetchItems, addItem, updateItem, removeItem } from "./apiHelpers.js";
 import logger from "./logger.js";
 
 export async function fetchTimePeriods() {
@@ -6,7 +6,7 @@ export async function fetchTimePeriods() {
 }
 
 export async function addTimePeriod(timePeriod) {
-	return await addItems("time-periods", "timePeriod", timePeriod);
+	return await addItem("time-periods", "timePeriod", timePeriod);
 }
 
 export async function updateTimePeriod(timePeriodId, updates) {
