@@ -36,11 +36,11 @@ router.get("/rewards", async (req, res) => {
  */
 router.post("/rewards", async (req, res) => {
 	try {
-		const query = req.app.locals.db("Rewards").insert(req.body);
+		const query = req.app.locals.db("Rewards").insert(req.body).returning("*");
 		logger.info(`Executing query: ${query.toString()}`);
-		const [id] = await query;
-		logger.info(`Inserted reward with ID: ${id}`);
-		res.json({ id });
+		const [reward] = await query;
+		logger.info(`Inserted reward: ${JSON.stringify(reward)}`);
+		res.status(201).json(reward);
 	} catch (error) {
 		logger.error("Error inserting reward:", error);
 		res.status(500).json({ error: "Failed to add reward." });
