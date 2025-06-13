@@ -118,9 +118,6 @@ export async function up(knex) {
 			.inTable("People")
 			.onDelete("CASCADE");
 		table.integer("points_used").notNullable();
-
-		// Common Columns for soft deletion and timestamps
-		table.boolean("deleted").defaultTo(false);
 		table.timestamps(true, true);
 	});
 }

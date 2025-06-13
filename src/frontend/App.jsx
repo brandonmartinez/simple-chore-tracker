@@ -15,7 +15,10 @@ import {
 	fetchChores,
 	fetchChoreAssignments,
 } from "./services/choresApiService";
-import { fetchPeople } from "./services/peopleApiService";
+import {
+	fetchPeople,
+	fetchPeoplePointTotals,
+} from "./services/peopleApiService";
 import { fetchRewards } from "./services/rewardsApiService";
 import {
 	fetchCurrentTimePeriod,
@@ -25,6 +28,7 @@ import {
 export default function App() {
 	const [chores, setChores] = useState([]);
 	const [people, setPeople] = useState([]);
+	const [peoplePointTotals, setPeoplePointTotals] = useState([]);
 	const [timePeriod, setTimePeriod] = useState(null);
 	const [timePeriods, setTimePeriods] = useState([]);
 	const [rewards, setRewards] = useState([]);
@@ -79,6 +83,10 @@ export default function App() {
 			logger.info("Fetched people:", people);
 			setPeople(people);
 		});
+		fetchPeoplePointTotals().then((totals) => {
+			logger.info("Fetched people point totals:", totals);
+			setPeoplePointTotals(totals);
+		});
 		fetchAvailableTimePeriods().then((weeks) => {
 			logger.info("Fetched available weeks:", weeks);
 			setTimePeriods(weeks);
@@ -123,6 +131,8 @@ export default function App() {
 						element={
 							<ChoreGrid
 								people={people}
+								peoplePointTotals={peoplePointTotals}
+								setPeoplePointTotals={setPeoplePointTotals}
 								chores={chores}
 								timePeriod={timePeriod}
 								setTimePeriod={setTimePeriod}

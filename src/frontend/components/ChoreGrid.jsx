@@ -8,7 +8,15 @@ import {
 	fetchChoreCompletions,
 } from "../services/choresApiService";
 
-function ChoreGrid({ people, chores, timePeriod, timePeriods, setTimePeriod }) {
+function ChoreGrid({
+	people,
+	peoplePointTotals,
+	setPeoplePointTotals,
+	chores,
+	timePeriod,
+	timePeriods,
+	setTimePeriod,
+}) {
 	const [choreCompletions, setChoreCompletions] = useState({});
 	const [choreAssignments, setChoreAssignments] = useState({});
 
@@ -99,6 +107,7 @@ function ChoreGrid({ people, chores, timePeriod, timePeriods, setTimePeriod }) {
 			setChoreCompletions((prev) => {
 				const prevChore = prev[choreId] || {};
 				const prevPersonCompletions = prevChore[personId] || [];
+
 				return {
 					...prev,
 					[choreId]: {
@@ -106,6 +115,17 @@ function ChoreGrid({ people, chores, timePeriod, timePeriods, setTimePeriod }) {
 						[personId]: [...prevPersonCompletions, choreCompletion],
 					},
 				};
+			});
+
+			setPeoplePointTotals((prevTotals) => {
+				return prevTotals.map((pt) =>
+					pt.person_id === personId
+						? {
+								...pt,
+								total_points: pt.total_points + choreCompletion.points_earned,
+						  }
+						: pt
+				);
 			});
 		});
 	}
@@ -161,7 +181,10 @@ function ChoreGrid({ people, chores, timePeriod, timePeriods, setTimePeriod }) {
 					key={person.id}
 					className="bg-slate-300 dark:bg-slate-600 p-2 rounded font-bold text-center text-slate-800 dark:text-slate-100"
 				>
-					{person.name}
+					{person.name} (
+					{peoplePointTotals.find((pt) => pt.person_id === person.id)
+						?.total_points || 0}
+					)
 				</div>
 			))}
 			<div></div>

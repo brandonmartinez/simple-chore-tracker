@@ -16,3 +16,11 @@ export async function updatePerson(personId, updates) {
 export async function removePerson(personId) {
 	return await removeItem("people", "person", personId);
 }
+
+export async function fetchPeoplePoints() {
+	return await fetchItems("people/points");
+}
+
+export async function fetchPeoplePointTotals() {
+	return await fetchItems("people/points/totals");
+}
